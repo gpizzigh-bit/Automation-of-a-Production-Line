@@ -1,0 +1,1 @@
+.\INFI_ENV\Scripts\deactivate

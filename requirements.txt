@@ -1,0 +1,6 @@
+sphinx
+pytest
+rich
+mysql-connector-python
+textual[dev]
+numpy

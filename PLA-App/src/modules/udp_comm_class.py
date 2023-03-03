@@ -1,3 +1,15 @@
+"""
+.. module:: udp_comm_class
+   :platform: Unix, Windows
+   :synopsis: Estabilish an UDP comunication to retrieve the orders data.
+
+.. moduleauthor:: Gabriel Pizzighini <up201800998@up.pt>
+
+
+"""
+
+
+
 import socket
 import xml.etree.ElementTree as ET
 from rich.traceback import install
@@ -5,11 +17,25 @@ install(show_locals=True)
 
 
 class Orders:
+    """
+    Class that retrieves orders from a udp connection server client XML file
+
+    :method get():
+        :return: list of orders from the connection socket
+        :rtype: list[dic]
+    """
 
     __aux = True
     _orders_list = []
 
     def __init__(self,ip,port) -> None:
+        """
+        Class constructor
+
+        Args:
+            ip (str): ip to estabilish the udp connection
+            port (int): port for estabilishing an udp connection
+        """
         self.ip = ip
         self.port = port
         pass
@@ -26,6 +52,12 @@ class Orders:
         return data
     
     def get(self):
+        """
+        Retrives the data from the cennection
+        
+        Returns:  
+            list (dic) -- the orders in a list of dictionaty.
+        """
         data = self.__connect()
         client = ET.fromstring(data)
         for orders in client:

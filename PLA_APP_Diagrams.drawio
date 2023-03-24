@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-03-24T16:51:16.666Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="nUxdriQVh1HZdRYZyRaX" version="21.1.1" type="github" pages="8">
+<mxfile host="app.diagrams.net" modified="2023-03-24T16:52:01.646Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36" etag="b4HlK2nlLSynmjwOocrQ" version="21.1.1" type="github" pages="8">
   <diagram id="kgpKYQtTHZ0yAKxKKP6v" name="Flow-chart">
     <mxGraphModel dx="2071" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -415,7 +415,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="D5pLMNmzvhwVKb-bDGbO" name="Database Diagram">
-    <mxGraphModel dx="1221" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1461" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -617,7 +617,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="g0vtUxXMGvi-jn7niW7K" name="Database Classes">
-    <mxGraphModel dx="606" dy="654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1461" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -672,8 +672,11 @@
         <mxCell id="dVCbiTrQHsEz04v3iH_W-20" value="+ method: get_Max(table_name,column)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="FJKOEfVYeCliXk1Lab6D-1">
           <mxGeometry y="394" width="340" height="26" as="geometry" />
         </mxCell>
+        <mxCell id="dVCbiTrQHsEz04v3iH_W-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.476;entryY=0.97;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="dVCbiTrQHsEz04v3iH_W-3" target="dVCbiTrQHsEz04v3iH_W-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="dVCbiTrQHsEz04v3iH_W-3" value="Clients" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="310" y="630" width="220" height="86" as="geometry" />
+          <mxGeometry x="140" y="740" width="220" height="86" as="geometry" />
         </mxCell>
         <mxCell id="dVCbiTrQHsEz04v3iH_W-11" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="dVCbiTrQHsEz04v3iH_W-3">
           <mxGeometry y="26" width="220" height="8" as="geometry" />
@@ -682,6 +685,18 @@
           <mxGeometry y="34" width="220" height="26" as="geometry" />
         </mxCell>
         <mxCell id="dVCbiTrQHsEz04v3iH_W-14" value="+ method: delete_Client(client_name)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dVCbiTrQHsEz04v3iH_W-3">
+          <mxGeometry y="60" width="220" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="dVCbiTrQHsEz04v3iH_W-22" value="Clients" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="740" width="220" height="86" as="geometry" />
+        </mxCell>
+        <mxCell id="dVCbiTrQHsEz04v3iH_W-23" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="dVCbiTrQHsEz04v3iH_W-22">
+          <mxGeometry y="26" width="220" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="dVCbiTrQHsEz04v3iH_W-24" value="+ method: add_Client(client_name)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dVCbiTrQHsEz04v3iH_W-22">
+          <mxGeometry y="34" width="220" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="dVCbiTrQHsEz04v3iH_W-25" value="+ method: delete_Client(client_name)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="dVCbiTrQHsEz04v3iH_W-22">
           <mxGeometry y="60" width="220" height="26" as="geometry" />
         </mxCell>
       </root>

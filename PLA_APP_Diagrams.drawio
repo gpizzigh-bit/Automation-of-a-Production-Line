@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-03-27T10:54:24.303Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.15" etag="PUY5Q4JFpFX_qLiDx_6r" version="21.1.1" type="github" pages="8">
+<mxfile host="app.diagrams.net" modified="2023-03-27T11:00:44.727Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.15" etag="MHtocAkBqFsKbzyHvlH-" version="21.1.1" type="github" pages="9">
   <diagram id="kgpKYQtTHZ0yAKxKKP6v" name="Flow-chart">
     <mxGraphModel dx="2010" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -561,6 +561,17 @@
         <mxCell id="FbVCiiSNtt8WnUe1-biI-1" value="Schedule Plan" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
           <mxGeometry x="950" y="1210" width="60" height="80" as="geometry" />
         </mxCell>
+        <mxCell id="UhRRYUa_ECII8WTZkb7O-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="UhRRYUa_ECII8WTZkb7O-2" target="4ieldCy7oNxamIffwvE--52">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="750" y="1330" />
+              <mxPoint x="335" y="1330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UhRRYUa_ECII8WTZkb7O-2" value="Wharehouse&lt;br&gt;Stock" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="750" y="1290" width="90" height="70" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
@@ -860,7 +871,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="-iqzpn4qIFk-2uOmD40Z" name="ERP-UML">
-    <mxGraphModel dx="1221" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1160" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1105,6 +1116,29 @@
             <mxPoint x="390" y="590" as="sourcePoint" />
             <mxPoint x="410" y="680" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="3RGxckAV2Pl3f8bD8pVR" name="Terminal Mockup">
+    <mxGraphModel dx="1160" dy="720" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Ft1R9A8QKiHTLFF9LjwQ-1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="760" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="Ft1R9A8QKiHTLFF9LjwQ-2" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;ERP Process Data&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="215" y="50" width="410" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Ft1R9A8QKiHTLFF9LjwQ-4" value="Plans" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="145" width="450" height="325" as="geometry" />
+        </mxCell>
+        <mxCell id="MQgF0IFBOl0gl5aQoWEX-1" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;Local Time&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="326" y="100" width="175" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MQgF0IFBOl0gl5aQoWEX-2" value="Orders" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="145" width="270" height="325" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

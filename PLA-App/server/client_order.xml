@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Client NameId="Jhon">
-    <Order Number="874" WorkPiece="P2" Quantity="16" DueDate="01" LatePen="6" EarlyPen="3">
-    </Order>
+    <Order Number="874" WorkPiece="P2" Quantity="16" DueDate="01" LatePen="6" EarlyPen="3"/>
 </Client>

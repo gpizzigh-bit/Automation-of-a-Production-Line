@@ -9,7 +9,7 @@ from time import monotonic
 class TimeDisplay(Static):
     """A widget to display elapsed time."""
 
-    start_time = reactive(monotonic)
+    start_time = reactive(monotonic())
     time = reactive(0.0)
 
     def _on_mount(self) -> None:
@@ -23,13 +23,13 @@ class TimeDisplay(Static):
     def watch_time(self, time: float) -> None:
         """Called when the time attribute changes."""
         _, seconds = divmod(time, 60)
-        self.update(f"Day Time: {seconds}")
+        self.update(f"Day Time: {seconds:.2f}")
 
 
 class DayDisplay(Static):
     """A widget to display the Day."""
 
-    start_time = reactive(monotonic)
+    start_time = reactive(monotonic())
     time = reactive(0.0)
 
     day = reactive(0)

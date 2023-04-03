@@ -69,21 +69,21 @@
 }
 
 
-TimeDisplay {
-    width: auto;
-    height: auto;
-    background: $panel;
-    padding: 1 1;
-    content-align: center middle;
-}
+/*/ DEPRECATED /*/
 
-DayDisplay {
-    width: auto;
-    height: auto;
-    background: $panel;
-    padding: 1 1;
-    content-align: center middle;
-}
+/*TimeDisplay {*/
+/*    width: auto;*/
+/*    height: auto;*/
+/*    background: $panel;*/
+/*    padding: 1 1;*/
+/*}*/
+
+/*DayDisplay {*/
+/*    width: auto;*/
+/*    height: auto;*/
+/*    background: $panel;*/
+/*    padding: 1 1;*/
+/*}*/
 
 /*Plans{*/
 /*    background: $panel;*/

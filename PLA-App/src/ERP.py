@@ -1,6 +1,8 @@
 
 import multiprocessing
-from modules import udp_comm_class, terminal_class
+import signal
+import sys
+from modules import udp_comm_class, terminal_class, database_orders_class
 from rich.traceback import install
 install(show_locals=True)
 
@@ -14,7 +16,14 @@ def process_orders():
 
 
 if __name__ == '__main__':
-    # p = multiprocessing.Process(target=process_orders)
-    # p.start()
-    terminal = terminal_class.ErpTerminal()
-    terminal.run()
+    try:
+        #p = multiprocessing.Process(target=process_orders)
+        #p.start()
+        signal.signal(signal.SIGINT, signal_handler)
+        terminal = terminal_class.ErpTerminal()
+        terminal.run()
+    except KeyboardInterrupt:
+        print("Caught KeyboardInterrupt, terminating ERP")
+        #p.terminate()
+        sys.exit(0)
+

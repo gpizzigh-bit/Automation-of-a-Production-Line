@@ -2,6 +2,7 @@ from textual.app import App, ComposeResult, RenderResult
 from textual.widgets import Button, Header, Footer, Static
 from textual.containers import Container, Horizontal, VerticalScroll, HorizontalScroll
 from textual.reactive import reactive
+import multiprocessing
 
 from .database_orders_class import Database, Orders
 
@@ -26,6 +27,7 @@ class TimeDisplay(Static):
         """Called when the time attribute changes."""
         _, seconds = divmod(time, 60)
         self.update(f"Day Time: {seconds:.2f}")
+
 
 
 class DayDisplay(Static):

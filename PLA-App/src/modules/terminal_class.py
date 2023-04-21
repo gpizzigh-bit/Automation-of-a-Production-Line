@@ -2,6 +2,9 @@ from textual.app import App, ComposeResult, RenderResult
 from textual.widgets import Button, Header, Footer, Static
 from textual.containers import Container, Horizontal, VerticalScroll, HorizontalScroll
 from textual.reactive import reactive
+import multiprocessing
+
+from .database_orders_class import Database, Orders
 
 from time import monotonic
 
@@ -24,6 +27,7 @@ class TimeDisplay(Static):
         """Called when the time attribute changes."""
         _, seconds = divmod(time, 60)
         self.update(f"Day Time: {seconds:.2f}")
+
 
 
 class DayDisplay(Static):
@@ -61,11 +65,16 @@ class Plans(Static):
         return "Plans"
 
 
-class Orders(Static):
+class OrdersWidget(Static):
     """Display Orders Widget"""
 
+    order = None
+
+    def set_order(self, order):
+        self.order = order
+
     def render(self) -> RenderResult:
-        return "Orders"
+        return self.order
 
 
 class ErpTerminal(App):
@@ -81,14 +90,20 @@ class ErpTerminal(App):
         yield Footer()
         with Container(id="app-grid"):
             with VerticalScroll(id="pending-orders-pane"):
-                for _ in range(30):
-                    yield Orders()
+                db = Database()
+                pending_orders_obj = Orders()
+                pending_orders = pending_orders_obj.read_All_Orders()
+                for order in pending_orders:
+                    orders_widget_instance = OrdersWidget()  # Create an instance of the OrdersWidget class
+                    orders_widget_instance.set_order(order)  # Call the set_order method on the instance
+                    yield orders_widget_instance
             with Horizontal(id="top-right"):
                 yield TimeDisplay()
                 yield DayDisplay()
             with VerticalScroll(id="finished-orders-pane"):
                 for _ in range(30):
-                    yield Orders()
+                    pass
+                    #yield Orders()
             with HorizontalScroll(id="bottom-right"):
                 for _ in range(30):
                     yield Plans()

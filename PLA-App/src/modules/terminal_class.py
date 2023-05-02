@@ -9,6 +9,9 @@ from .database_orders_class import Database, Orders
 from time import monotonic
 
 
+def calculate_piece_cost():
+    pass
+
 class TimeDisplay(Static):
     """A widget to display elapsed time."""
 
@@ -27,7 +30,6 @@ class TimeDisplay(Static):
         """Called when the time attribute changes."""
         _, seconds = divmod(time, 60)
         self.update(f"Day Time: {seconds:.2f}")
-
 
 
 class DayDisplay(Static):

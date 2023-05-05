@@ -3,7 +3,7 @@ import signal
 import sys
 import threading
 from modules import udp_comm_class, terminal_class, database_orders_class
-from modules import tcp_comm
+from modules import tcp_comm, MPS
 from rich.traceback import install
 from time import monotonic
 
@@ -31,14 +31,17 @@ def process_orders():
     orders_obj.start()
 
 
+
 if __name__ == '__main__':
     try:
-        p = multiprocessing.Process(target=process_orders)
-        p.start()
-        tcp_process = multiprocessing.Process(target=process_tcp_comm)
-        tcp_process.start()
-        terminal = terminal_class.ErpTerminal()
-        terminal.run()
+        #p = multiprocessing.Process(target=process_orders)
+        #p.start()
+        #tcp_process = multiprocessing.Process(target=process_tcp_comm)
+        #tcp_process.start()
+        #terminal = terminal_class.ErpTerminal()
+        #terminal.run()
+        mps = MPS.Scheduler()
+        mps.run()
     except KeyboardInterrupt:
         print("Caught KeyboardInterrupt, terminating ERP")
         sys.exit(0)

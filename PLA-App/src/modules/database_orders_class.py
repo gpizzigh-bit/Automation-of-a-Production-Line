@@ -202,7 +202,17 @@ class Orders(Database):
             a=a+1
         return result_list
     
+class Clients(Database):
 
+    # Clients table subclass
+
+    def add_Client(self,client_name):
+        id=self.get_Max("clients","clientid")+1
+        self.insert_Row("clients",f"{id},'{client_name}'")
+    def delete_Client(self,client_name):
+        self.delete_Row("clients",f"name='{client_name}'")
+    def check_Client(self,client_name):
+        return self.check_Amount("clients",f"name='{client_name}'")
 
 '''
 Example code

@@ -43,17 +43,18 @@ class DayDisplay(Static):
     def _on_mount(self) -> None:
         """Event handler called when widget is added to the app."""
         self.set_interval(1 / 60, self.update_time)
+        self.set_interval(56, self.update_day)
         self.day = 0
 
     def update_time(self):
         """Method to update the time to the current time."""
         self.time = monotonic() - self.start_time
 
-    def update_day(self, time: float):
+    def update_day(self):
         """Method to update the time to the current time."""
-        _, seconds = divmod(time, 60)
-        if seconds >= 10.99:
-            self.day += 1
+        # _, seconds = divmod(time, 60)
+        # if seconds >= 10.99:
+        self.day += 1
 
     def watch_day(self, day: int) -> None:
         """Called when the day attribute changes."""

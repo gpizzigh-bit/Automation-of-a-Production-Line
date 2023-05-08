@@ -8,6 +8,10 @@ simple FIFO planner for the MPS scheduler, we must try to reach each deadline
 """
 
 from .database_orders_class import Database, Orders
+import numpy as np
+
+STORE_GLOBAL = "makeANDstore"
+DELIVER_GLOBAL = "makeANDdeliver"
 
 
 class Scheduler:
@@ -22,45 +26,25 @@ class Scheduler:
         self.totalmachines = 4
 
     def run(self):
-        manufacturing_days = 0
+
+        # TODO don't connect to teh database inside the mps this is slowing down execution
         self._parse_data()
         self.find_last_deadline()
         self.find_total_time()
 
-        # there is a maximum of pieces that can be manufactured by day these are represented by tokens
-        # aim at the first orders deadline
+        # for each_order in self.order_list:
+        #     print(each_order)
 
-        # # check the first orders quantity
-        # first_order_type = self.order_list[0][' workpiece'].replace(" ", "")
-        # first_order_total_size = int(self.order_list[0][' quantity'])
-        # first_order_deadline = int(self.order_list[0][' duedate'])
-        # match first_order_type:
-        #     case "P9":
-        #         manufacturing_days = 3
-        #
-        # if first_order_total_size >= self.totalmachines:
-        #     # order takes more than 1 day to make need to subdivide
-        #     fullbooked_days = manufacturing_days * int(first_order_total_size / self.totalmachines)
-        #     if first_order_total_size % self.totalmachines != 0:
-        #         extradays = self.totalmachines - first_order_total_size % self.totalmachines
-        #     else:
-        #         extradays = 0
-        #     total_days = fullbooked_days + extradays
-        #     time_to_complete = total_days * 60
-        #
-        # # arrange them based on the deadline
-        # for days in range(0, total_days):
-        #     if days != 0:
-        #         self.result_list[first_order_deadline - days] = [self.request_piece("P9", "make")]
-        #     else:
-        #         self.result_list[first_order_deadline - days] = [self.request_piece("P9", "make&deliver")]
-        # # remove the time consumed
-        # self.total_time -= time_to_complete
+        for order_number in range(0, len(self.order_list)):
+            # for order_number in range(0, 3):
+            self.schedule_order(order_number)
 
-        self.schedule_order(0)
-        self.schedule_order(1)
+        self.resolve_all_conflicts()
 
-        print(self.nested_result_list)
+        day = 0
+        for each_list in self.nested_result_list:
+            print(f"day:{day} \n {each_list}")
+            day += 1
 
         return self.nested_result_list
 
@@ -109,18 +93,41 @@ class Scheduler:
             total_days = fullbooked_days + extradays
             time_to_complete = total_days * 60
         else:
-            total_days = 1
+            total_days = manufacturing_days
             time_to_complete = total_days * 60
 
+        # TODO check for storage capacity
+        piece_tree = self.find_in_tree("P2", order_type)
         # arrange them based on the deadline
+        aux = -1
+        store_local = STORE_GLOBAL
         for days in range(0, total_days):
             if days != 0:
-                self.nested_result_list[order_deadline - days].append(self.request_piece(order_type, "make"))
+                # self.nested_result_list[order_deadline - days].append(self.request_piece(order_type, "make"))
+                for _ in range(0, int(order_total_size / (total_days / manufacturing_days))):
+                    self.nested_result_list[order_deadline - days].append(
+                        self.request_piece(piece_tree[aux], store_local))
+                if days == manufacturing_days - 1:
+                    aux = 0  # reset index
+                    # here we need to signal to store and deliver the piece
+                    store_local = "storeANDdeliver"
+                else:
+                    store_local = STORE_GLOBAL
+                aux -= 1
             else:
-                self.nested_result_list[order_deadline - days].append(self.request_piece(order_type, "make&deliver"))
+                # self.nested_result_list[order_deadline - days].append(self.request_piece(order_type, "make&deliver"))
+                for _ in range(0, int(order_total_size / (total_days / manufacturing_days))):
+                    self.nested_result_list[order_deadline - days].append(
+                        self.request_piece(piece_tree[aux], DELIVER_GLOBAL))
+                aux -= 1
 
         # remove the time consumed
         self.total_time -= time_to_complete
+
+        # TODO - create piece orders on the MPS
+        # TODO - Show desired 4 pieces per day
+        # TODO - resolve conflicts if more than 4 piece per day
+        # TODO - send to database
 
     def get_manufacturing_days(self, order_type):
         order_type = order_type.replace(" ", "")
@@ -134,4 +141,63 @@ class Scheduler:
             case "P5":
                 return 4
 
+    def find_in_tree(self, origin_type, piece_type):
+        result_list = []
+        match piece_type:
+            case "P4":
+                result_list.extend(["P4"])
+                return result_list
+            case "P7":
+                result_list.extend(["P4", "P7"])
+                return result_list
+            case "P9":
+                result_list.extend(["P4", "P7", "P9"])
+                return result_list
+            case "P5":
+                result_list.extend(["P4", "P7", "P9", "P5"])
+                return result_list
+            case "P6":
+                if origin_type == "P2":
+                    result_list.extend(["P3", "P6"])
+                    return result_list
+                elif origin_type == "P1":
+                    result_list.extend(["P6"])
+                    return result_list
+            case "P3":
+                result_list.extend(["P3"])
+                return result_list
+            case "P8":
+                if origin_type == "P2":
+                    result_list.extend(["P3", "P6", "P8"])
+                    return result_list
+                elif origin_type == "P1":
+                    result_list.extend(["P6", "P8"])
+                    return result_list
 
+    def check_for_conflicts(self):
+        for day_list in self.nested_result_list:
+            if len(day_list) > 4:
+                return True
+        return False
+
+    def resolve_all_conflicts(self):
+        pos_in_loop = 0
+        size_of_nested_list = len(self.nested_result_list)
+        # identify conflicts
+        #while pos_in_loop <= size_of_nested_list:
+        while self.check_for_conflicts():
+            pos_in_nested_list = 0
+            for day_list in self.nested_result_list:
+                if len(day_list) > 4:
+                    # check pieces penalties, because we are doing a FIFO we move the last piece forward
+                    # make a decision
+                    # resolve them somehow
+                    # move pieces
+                    # update the nested list
+                    if (pos_in_nested_list + 1) >= len(self.nested_result_list):
+                        self.nested_result_list.append(list())
+                        size_of_nested_list = len(self.nested_result_list)
+                    self.nested_result_list[pos_in_nested_list + 1].append(day_list[-1])
+                    day_list.pop()  # removes the last element
+                pos_in_nested_list += 1
+            pos_in_loop += 1

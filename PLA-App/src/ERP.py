@@ -31,17 +31,23 @@ def process_orders():
     orders_obj.start()
 
 
-
 if __name__ == '__main__':
+    terminal = terminal_class.ErpTerminal()
     try:
-        #p = multiprocessing.Process(target=process_orders)
-        #p.start()
-        #tcp_process = multiprocessing.Process(target=process_tcp_comm)
-        #tcp_process.start()
-        #terminal = terminal_class.ErpTerminal()
-        #terminal.run()
+        # p = multiprocessing.Process(target=process_orders)
+        # p.start()
+        # tcp_process = multiprocessing.Process(target=process_tcp_comm)
+        # tcp_process.start()
         mps = MPS.Scheduler()
         mps.run()
+        mps.run()
+        terminal.show_new_plans(mps)
+        terminal.run()
+        mps.request_lock_current_day = True
+        mps.run()
+        terminal.show_new_plans(mps)
+        current_day = mps.current_day
     except KeyboardInterrupt:
+        terminal.exit(0, "Caught KeyboardInterrupt, terminating Terminal")
         print("Caught KeyboardInterrupt, terminating ERP")
         sys.exit(0)

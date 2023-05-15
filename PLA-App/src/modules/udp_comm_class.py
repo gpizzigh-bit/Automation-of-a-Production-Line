@@ -72,6 +72,9 @@ class ProcessOrders:
             self._orders_list.append(orders.attrib)
         return self._orders_list
 
+    def get_last_order(self):
+        return self._orders_list[-1:]
+
     def start(self):
         """
         Starts listening for an udp connection to retrieve data and send to the database.

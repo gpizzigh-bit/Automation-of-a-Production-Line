@@ -7,7 +7,7 @@ class Database():
         
         self.dbname ="d42s9l8fg14nqm"
         self.user = "trroxnzyvifgnt"
-        self.password = ""
+        self.password = "85c17ff132d95b23eca8d735622ee140e9e09913e2dffd69586074c279217cba"
         self.host ="ec2-18-202-8-133.eu-west-1.compute.amazonaws.com"
         self.port = "5432"
         self.conn = psycopg2.connect(
@@ -94,6 +94,11 @@ class Database():
         self.conn.commit()
         return (result)
 
+    def read_Value(self,table_name,value,condition):
+        query=f"SELECT {value} FROM {table_name} WHERE {condition};"
+        self.cur.execute(query)
+        self.conn.commit()
+        return self.cur.fetchone()[0]  
 
 class Concluded(Database):
 
@@ -101,12 +106,15 @@ class Concluded(Database):
     # Add_Order adds an order number to the concluded orders table
     # Delete_Order deletes an order by its number
     # Read All_Orders returns an array of strings, each string corresponds to an order and contains all its values: number,piecetype,date,etc
-    def add_Order(self,number):  
-        self.insert_Row("concluded",f"{number}")
-    def delete_Order(self,number):
-        self.delete_Row("concluded",f"number={number}")
+    def add_Concluded(self,number,workpiece,quantity,duedate,latepen,earlypen,client):
+        clientid=self.read_Value("clients","clientid",f"name='{client}'")
+        self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+    def delete_Order(self,number,clientid):
+        self.delete_Row("concluded",f"number={number} AND clientid={clientid}")
+    def update_Order(self,number,new_quantity):
+        self.update_Value("concluded",f"number={number}",f"{new_quantity}")
     def read_All_Orders(self):
-        col_names=["number"]
+        col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list=[]
         rows=self.read_Table("concluded")
         for row in rows:
@@ -115,27 +123,30 @@ class Concluded(Database):
             result_list.append(row_string)
 
         return result_list   
-
-class Pending(Database):
-
-    # Pending orders table subclass
-    # Add_Order adds an order number to the pending orders table
-    # Delete_Order deletes an order by its number
-    # Read All_Orders returns an array of strings, each string corresponds to an order and contains all its values: number,piecetype,date,etc
-    def add_Order(self,number):
-        self.insert_Row("pending",f"{number}")
-    def delete_Order(self,number):
-        self.delete_Row("pending",f"number={number}")
-    def read_All_Orders(self):
-        col_names=["number"]
+    def read_Order_Number_X(self,order_number):
+        col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
+        rows=self.read_Values("concluded","number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number={order_number}")
         result_list=[]
-        rows=self.read_Table("pending")
         for row in rows:
             row_strings = [f"{col_names[i]}: {str(row[i])}" for i in range(len(col_names))]
             row_string = '; '.join(row_strings)
             result_list.append(row_string)
+        return result_list
+    
+    def read_X_Orders(self,number_of_orders):
+        col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
+        rows=self.read_Table("concluded")
+        result_list=[]
+        a=0
+        for row in rows:
+            if a==number_of_orders:
+                break
+            row_strings = [f"{col_names[i]}: {str(row[i])}" for i in range(len(col_names))]
+            row_string = '; '.join(row_strings)
+            result_list.append(row_string)
+            a=a+1
+        return result_list
 
-        return result_list   
 
 
 class Orders(Database):
@@ -150,10 +161,11 @@ class Orders(Database):
     # read_X_Orders returns an array with X number of orders 
     
 
-    def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
+    def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,client):
+        clientid=self.read_Value("clients","clientid",f"name='{client}'")
         self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
-    def delete_Order(self,number):
-        self.delete_Row("orders",f"number={number}")
+    def delete_Order(self,number,clientid):
+        self.delete_Row("orders",f"number={number} AND clientid={clientid}")
     def update_Order(self,number,new_quantity):
         self.update_Value("orders",f"number={number}",f"{new_quantity}")
     def read_All_Orders(self):
@@ -190,6 +202,17 @@ class Orders(Database):
             a=a+1
         return result_list
     
+class Clients(Database):
+
+    # Clients table subclass
+
+    def add_Client(self,client_name):
+        id=self.get_Max("clients","clientid")+1
+        self.insert_Row("clients",f"{id},'{client_name}'")
+    def delete_Client(self,client_name):
+        self.delete_Row("clients",f"name='{client_name}'")
+    def check_Client(self,client_name):
+        return self.check_Amount("clients",f"name='{client_name}'")
 
 '''
 Example code

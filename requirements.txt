@@ -6,4 +6,5 @@ mysql-connector-python
 textual[dev]
 numpy
 psycopg2
+upcua
 

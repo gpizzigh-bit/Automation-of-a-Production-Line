@@ -27,7 +27,13 @@ class Database():
         query=f"CREATE TABLE if not exists {table_name} ({columns});"
         self.cur.execute(query)
         self.conn.commit()
-        
+
+    def check_Amount(self,table_name,condition):
+        query=f"SELECT COUNT (*)FROM {table_name} WHERE {condition}"
+        self.cur.execute(query)
+        self.conn.commit()
+        result=self.cur.fetchone()
+        return result[0]>0  
         
     def delete_Table(self,table_name):
        

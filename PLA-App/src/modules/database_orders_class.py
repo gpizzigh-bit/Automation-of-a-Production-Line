@@ -28,6 +28,12 @@ class Database():
         self.cur.execute(query)
         self.conn.commit()
         
+    def check_Amount(self,table_name,condition):
+        query=f"SELECT COUNT (*)FROM {table_name} WHERE {condition}"
+        self.cur.execute(query)
+        self.conn.commit()
+        result=self.cur.fetchone()
+        return result[0]>0
         
     def delete_Table(self,table_name):
        
@@ -213,6 +219,13 @@ class Clients(Database):
         self.delete_Row("clients",f"name='{client_name}'")
     def check_Client(self,client_name):
         return self.check_Amount("clients",f"name='{client_name}'")
+
+class MES(Database):
+    def Instert_Day(self,Day,Order1,Order2,Order3,Order4):
+        self.insert_Row("Days",f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
+    def Delete_Day(self,Day):
+        self.delete_Row("Days",f"Day={Day}")
+    
 
 '''
 Example code

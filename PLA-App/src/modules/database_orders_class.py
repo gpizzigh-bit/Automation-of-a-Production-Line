@@ -207,7 +207,9 @@ class Orders(Database):
             result_list.append(row_string)
             a=a+1
         return result_list
-    
+    def Latest_Due_Date(self):
+        Latest=self.get_Max("Orders","duedate")
+        return Latest
 class Clients(Database):
 
     # Clients table subclass
@@ -221,10 +223,18 @@ class Clients(Database):
         return self.check_Amount("clients",f"name='{client_name}'")
 
 class MES(Database):
-    def Instert_Day(self,Day,Order1,Order2,Order3,Order4):
+    def Insert_Day(self,Day,Order1,Order2,Order3,Order4):
         self.insert_Row("Days",f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
     def Delete_Day(self,Day):
         self.delete_Row("Days",f"Day={Day}")
+    def Update_Order(self,Day,Order_Number,New_Order):
+        self.update_Value("Days",f"Day={Day}",f"Order{Order_Number}='{New_Order}'")
+    def Update_Current_Day(self):
+        Ord1=self.read_Value("Days","Order1","Day=0")
+        Ord2=self.read_Value("Days","Order2","Day=0")
+        Ord3=self.read_Value("Days","Order3","Day=0")
+        Ord4=self.read_Value("Days","Order4","Day=0")
+        self.update_Value("Current_Day","ID=0",f"Order1='{Ord1}',Order2='{Ord2}',Order3='{Ord3}',Order4='{Ord4}'")
     
 
 '''

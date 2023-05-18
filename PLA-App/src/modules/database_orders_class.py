@@ -39,7 +39,7 @@ class Database():
        
         #Delete table with given parameters
 
-        query=f"DROP TABLE {table_name};"
+        query=f"DROP TABLE {table_name} CASCADE;"
         self.cur.execute(query)
         self.conn.commit()
 
@@ -222,7 +222,7 @@ class Clients(Database):
     def check_Client(self,client_name):
         return self.check_Amount("clients",f"name='{client_name}'")
 
-class MES(Database):
+class MPS(Database):
     def Insert_Day(self,Day,Order1,Order2,Order3,Order4):
         self.insert_Row("Days",f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
     def Delete_Day(self,Day):
@@ -235,7 +235,17 @@ class MES(Database):
         Ord3=self.read_Value("Days","Order3","Day=0")
         Ord4=self.read_Value("Days","Order4","Day=0")
         self.update_Value("Current_Day","ID=0",f"Order1='{Ord1}',Order2='{Ord2}',Order3='{Ord3}',Order4='{Ord4}'")
-    
+    def Next_Day(self):
+        max=self.get_Max("Days","Day")
+        i=1
+        while i<max:
+            ord1=self.read_Value("Days","Order1",f"Day={i}")
+            ord2=self.read_Value("Days","Order2",f"Day={i}")
+            ord3=self.read_Value("Days","Order3",f"Day={i}")
+            ord4=self.read_Value("Days","Order4",f"Day={i}")
+            
+            
+        self.Delete_Day(max)
 
 '''
 Example code

@@ -39,7 +39,7 @@ class Database():
        
         #Delete table with given parameters
 
-        query=f"DROP TABLE {table_name};"
+        query=f"DROP TABLE {table_name} CASCADE;"
         self.cur.execute(query)
         self.conn.commit()
 

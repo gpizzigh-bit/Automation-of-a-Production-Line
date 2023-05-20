@@ -235,18 +235,31 @@ class MPS(Database):
         Ord3=self.read_Value("Days","Order3","Day=0")
         Ord4=self.read_Value("Days","Order4","Day=0")
         self.update_Value("Current_Day","ID=0",f"Order1='{Ord1}',Order2='{Ord2}',Order3='{Ord3}',Order4='{Ord4}'")
-    def Next_Day(self):
-        max=self.get_Max("Days","Day")
-        i=1
-        while i<max:
-            ord1=self.read_Value("Days","Order1",f"Day={i}")
-            ord2=self.read_Value("Days","Order2",f"Day={i}")
-            ord3=self.read_Value("Days","Order3",f"Day={i}")
-            ord4=self.read_Value("Days","Order4",f"Day={i}")
+    def create_Schedule(self,number_of_days):
+        i=0
+        while i<number_of_days:
+            self.Insert_Day(i,"","","","")
+            i=i+1
+    def delete_Schedule(self):
+        days=self.get_Max("Days","Day")
+        while days>0:
+            self.Delete_Day(days)
+            days=days-1
+    def next_Day(self):
+        days=self.get_Max("Days","Day")
+        i=0
+        while i<days-1:
+            Ord1=self.read_Value("Days","Order1",f"Day={i+1}")
+            Ord2=self.read_Value("Days","Order2",f"Day={i+1}")
+            Ord3=self.read_Value("Days","Order3",f"Day={i+1}")
+            Ord4=self.read_Value("Days","Order4",f"Day={i+1}")
+            self.Update_Order(i,"1",Ord1)
+            self.Update_Order(i,"2",Ord2)
+            self.Update_Order(i,"3",Ord3)
+            self.Update_Order(i,"4",Ord4)
+            i=i+1
+        self.Delete_Day(days)    
             
-            
-        self.Delete_Day(max)
-
 '''
 Example code
 

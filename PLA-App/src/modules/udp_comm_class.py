@@ -86,17 +86,17 @@ class ProcessOrders:
             client_dict = orders_list[0]
             client_name = client_dict['NameId'].split()[1] ## get only the name
             # [TODO] Remove this
-            match client_name:
-                case "AA":
-                    client_id = 1
-                case "BB":
-                    client_id = 2
-                case "CC":
-                    client_id = 3
-                case "DD":
-                    client_id = 4
-                case _:
-                    client_id = 0
+            # match client_name:
+            #     case "AA":
+            #         client_id = 1
+            #     case "BB":
+            #         client_id = 2
+            #     case "CC":
+            #         client_id = 3
+            #     case "DD":
+            #         client_id = 4
+            #     case _:
+            #         client_id = 0
             for orders_dict in orders_list[1:]:
                 number = orders_dict['Number']
                 work_piece = orders_dict['WorkPiece']
@@ -104,6 +104,7 @@ class ProcessOrders:
                 due_date = orders_dict['DueDate']
                 late_pen = orders_dict['LatePen']
                 early_pen = orders_dict['EarlyPen']
+                client_id = client_dict['NameId']
                 orders_obj.add_Order(number,
                                      work_piece,
                                      quantity,
@@ -111,5 +112,3 @@ class ProcessOrders:
                                      late_pen,
                                      early_pen,
                                      client_id)
-                #print(orders_dict)
-            #print(orders_list)

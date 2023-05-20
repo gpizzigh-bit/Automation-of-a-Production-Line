@@ -99,6 +99,7 @@ class Scheduler:
 
     def run(self):
         self.nested_result_list = []
+        self.order_list = []
         # TODO don't connect to the database inside the mps this is slowing down execution
         self._parse_data()
         self.find_last_deadline()
@@ -284,8 +285,14 @@ class Scheduler:
         # copy the current day on a self list
         self.current_day = self.nested_result_list[0].copy()
         self.nested_result_list.pop(0)
-        for i in range(len(self.nested_result_list)):
-            self.nested_result_list[i] = self.nested_result_list[i][:]
+        if len(self.order_list) >= 2:
+            pending = Orders()
+            pending.delete_Order(self.order_list[0]['number'], self.order_list[0][' clientid'])
+            for i in range(len(self.nested_result_list)):
+                self.nested_result_list[i] = self.nested_result_list[i][:]
+        else :
+            print("[ERROR] - Empty Database")
+            exit(1)
 
     def show_schedule(self):
         day = 0

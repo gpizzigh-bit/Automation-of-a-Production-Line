@@ -13,12 +13,12 @@ client = Client(url)
 """
 
 #exemplo de dados recebidos do erp
-pedidos = {
-    'pedido1': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido2': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido3': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido4': {'workpiece': "p3", 'todo': "makeANDstore"}
-}
+pedidos = [
+[{'workpiece': "P9", 'status': "makeANDstore"}],
+[{'workpiece': "P6", 'status': "makeANDstore"}],
+[{'workpiece': "P9", 'status': "makeANDstore"}],
+[{'workpiece': "P9", 'status': "makeANDstore"}]
+]
 
 #estado das maquinas:
 M1livre = True  #T1, T2, T3

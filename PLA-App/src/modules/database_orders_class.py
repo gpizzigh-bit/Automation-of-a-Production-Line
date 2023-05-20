@@ -168,7 +168,7 @@ class Orders(Database):
     
 
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,client):
-        clientid=self.read_Value("clients","clientid",f"name='{client}'")
+        clientid=self.read_Value("clients","clientid",f"clientid='{client}'")
         self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number={number} AND clientid={clientid}")
@@ -219,8 +219,8 @@ class Clients(Database):
         self.insert_Row("clients",f"{id},'{client_name}'")
     def delete_Client(self,client_name):
         self.delete_Row("clients",f"name='{client_name}'")
-    def check_Client(self,client_name):
-        return self.check_Amount("clients",f"name='{client_name}'")
+    def check_Client(self,clientid):
+        return self.check_Amount("clients",f"clientid='{clientid}'")
 
 class MPS(Database):
     def Insert_Day(self,Day,Order1,Order2,Order3,Order4):

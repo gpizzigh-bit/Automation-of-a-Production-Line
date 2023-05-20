@@ -170,13 +170,13 @@ class Orders(Database):
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
         cl=Clients()
         if cl.check_Client(clientid) == True:
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         else :
             cl.add_Client(clientid)
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         cl.close()
     def delete_Order(self,number,clientid):
-        self.delete_Row("orders",f"number={number} AND clientid={clientid}")
+        self.delete_Row("orders",f"number='{number}' AND clientid='{clientid}'")
     def update_Order(self,number,new_quantity):
         self.update_Value("orders",f"number={number}",f"{new_quantity}")
     def read_All_Orders(self):

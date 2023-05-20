@@ -7,4 +7,4 @@ textual[dev]
 numpy
 psycopg2
 upcua
-
+collections

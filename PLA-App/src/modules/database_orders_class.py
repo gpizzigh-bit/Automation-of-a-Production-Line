@@ -167,9 +167,14 @@ class Orders(Database):
     # read_X_Orders returns an array with X number of orders 
     
 
-    def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,client):
-        clientid=self.read_Value("clients","clientid",f"clientid='{client}'")
-        self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+    def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
+        cl=Clients()
+        if cl.check_Client(clientid) == True:
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+        else :
+            cl.add_Client(clientid)
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+        cl.close()
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number={number} AND clientid={clientid}")
     def update_Order(self,number,new_quantity):
@@ -215,8 +220,7 @@ class Clients(Database):
     # Clients table subclass
 
     def add_Client(self,client_name):
-        id=self.get_Max("clients","clientid")+1
-        self.insert_Row("clients",f"{id},'{client_name}'")
+        self.insert_Row("clients",f"'{client_name}'")
     def delete_Client(self,client_name):
         self.delete_Row("clients",f"name='{client_name}'")
     def check_Client(self,clientid):

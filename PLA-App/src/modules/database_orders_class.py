@@ -222,7 +222,7 @@ class Clients(Database):
     def add_Client(self,client_name):
         self.insert_Row("clients",f"'{client_name}'")
     def delete_Client(self,client_name):
-        self.delete_Row("clients",f"name='{client_name}'")
+        self.delete_Row("clients",f"clientid='{client_name}'")
     def check_Client(self,clientid):
         return self.check_Amount("clients",f"clientid='{clientid}'")
 

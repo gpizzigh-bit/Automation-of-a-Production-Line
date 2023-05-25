@@ -39,18 +39,16 @@ class ProcessOrders:
         self.ip = ip
         self.port = port
         self.SIG_UPDATE = False
-        pass
 
     def __connect(self):
-        print("Waiting for connection...")
-        self.__aux = True
+        print(f" [UDP] Waiting for connection... over {self.ip} : {self.port} ")
         sock = socket.socket(socket.AF_INET,  # Internet
                              socket.SOCK_DGRAM)  # UDP
         sock.bind((self.ip, self.port))
-
+        self.__aux = True
         while self.__aux:
             data, _ = sock.recvfrom(1024)  # buffer size is 1024 bytes
-            sock.close()
+            sock.close()  # close socket
             self.__aux = False  # exit loop
         return data
 
@@ -63,12 +61,9 @@ class ProcessOrders:
         """
         data = self.__connect()
         self._orders_list = []
-        #print("Received:", data)
         client = ET.fromstring(data)
         for orders in client:
-            #print("Received:", orders.attrib)
             data_as_dict = orders.attrib.values()
-            #print(data_as_dict)
             self._orders_list.append(orders.attrib)
         return self._orders_list
 
@@ -85,18 +80,6 @@ class ProcessOrders:
             orders_list = self.get()
             client_dict = orders_list[0]
             client_name = client_dict['NameId'].split()[1] ## get only the name
-            # [TODO] Remove this
-            # match client_name:
-            #     case "AA":
-            #         client_id = 1
-            #     case "BB":
-            #         client_id = 2
-            #     case "CC":
-            #         client_id = 3
-            #     case "DD":
-            #         client_id = 4
-            #     case _:
-            #         client_id = 0
             for orders_dict in orders_list[1:]:
                 number = orders_dict['Number']
                 work_piece = orders_dict['WorkPiece']

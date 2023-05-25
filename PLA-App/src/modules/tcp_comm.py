@@ -1,7 +1,9 @@
 import socket
+import pickle
 
 global_ip = "127.0.0.1"
 global_port = 12345
+
 
 class TCPClient:
     def __init__(self):
@@ -10,13 +12,15 @@ class TCPClient:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self):
+        print(f" [TCP CLIENT] Waiting for connection... over {self.ip} : {self.port} ")
         self.socket.connect((self.ip, self.port))
 
     def send(self, message):
-        self.socket.send(message.encode())
+        data = pickle.dumps(message)
+        self.socket.send(data)
 
     def receive(self, buffer_size):
-        return self.socket.recv(buffer_size).decode()
+        return self.socket.recv(buffer_size)
 
     def close(self):
         self.socket.close()
@@ -27,19 +31,18 @@ class TCPServer:
         self.ip = global_ip
         self.port = global_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(f" [TCP] Waiting for connection... over {self.ip} : {self.port} ")
         self.socket.bind((self.ip, self.port))
         self.socket.listen(1)
         self.connection, self.address = self.socket.accept()
 
     def receive(self, buffer_size):
-        return self.connection.recv(buffer_size).decode()
+        return self.connection.recv(buffer_size)
 
     def send(self, message):
-        self.connection.send(message.encode())
+        data = pickle.dumps(message)
+        self.connection.send(data)
 
     def close(self):
         self.connection.close()
         self.socket.close()
-
-
-

@@ -142,11 +142,12 @@ class ErpTerminal(App):
                     yield orders_widget_instance
             with HorizontalScroll(id="bottom-right"):
                 mps = self.mps_obj
-                print(mps.get_plans_list())
-                for plans in mps.get_plans_list():
-                    plans_obj = Plans()
-                    plans_obj.set_plan(list_to_string(plans))
-                    yield plans_obj
+                if mps.get_plans_list() is not None:
+                    print(mps.get_plans_list())
+                    for plans in mps.get_plans_list():
+                        plans_obj = Plans()
+                        plans_obj.set_plan(list_to_string(plans))
+                        yield plans_obj
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""

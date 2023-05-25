@@ -5,3 +5,5 @@ PLA-App/.idea/
 PLA-App/docs/
 
 PLA-App/src/modules/__pycache__/
+
+.idea/

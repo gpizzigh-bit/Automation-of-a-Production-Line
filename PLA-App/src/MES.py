@@ -2,19 +2,30 @@
 # [TODO] Lost Communication retrive "Last state" from the database
 # [TODO] Execute Orders
 
-#import multiprocessing
-#from modules import tcp_comm
+import multiprocessing
+import pickle
+from modules import tcp_comm
 
 from opcua import Client
 from collections import Counter
 
-"""
+
 url = "opc.tcp://localhost:4840"
 client = Client(url)
-"""
 
 P3 = 'P3'
 done = 0
+
+
+def process_tcp_comm():
+    client_erp = tcp_comm.TCPClient()
+    print("receiving...")
+    client_erp.connect()
+    while True:
+        message = client_erp.receive(1024)
+        if message is not None:
+            data = pickle.loads(message)
+            print(f"Received: {data}")
 
 #exemplo de dados recebidos do erp
 requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
@@ -43,7 +54,7 @@ def makeP3(tipopeca, entrega):
     global M1livre, M3livre, machineUsed
     #alterar variaveis do plc para a peça andar ate ao segundo tapete
 
-    """if M1livre == True:
+    if M1livre == True:
         #ativar maquina 1 no plc
         machineUsed == 1
         M1livre = False
@@ -59,7 +70,7 @@ def makeP3(tipopeca, entrega):
                     break
                 elif M3livre==True:
                     machineUsed == 3
-                    break"""
+                    break
 
     #alterar variaveis do plc de forma a iniciar a producao na maquina que ficou livre
     print(f'a peça esta a ser feita na maquina {machineUsed}')
@@ -81,7 +92,7 @@ def total_equal_pieces():
 
 
 def machines_to_use():
-
+    pass
 
 def switch_case(x):
     if x == P3:
@@ -125,7 +136,7 @@ def showTerminal():
    Monitor the current production order list, as well as the status of each order received from the ERP. The status
    includes the number of pieces already produced, the number of pending pieces, the total production time of the order, etc. 
    The user interface should also provide enough information for the user to determine the status of that algorithm.
-       """
+    """
 
 
 '''
@@ -159,8 +170,8 @@ def wh_m1(client):
 """
 
 if __name__ == '__main__':
-    #tcp_process = multiprocessing.Process(target=process_tcp_comm)
-    #tcp_process.start()
+    tcp_process = multiprocessing.Process(target=process_tcp_comm)
+    tcp_process.start()
 
     """while True:
         if pedidos != 0:

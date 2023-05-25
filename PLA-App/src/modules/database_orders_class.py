@@ -124,7 +124,7 @@ class Concluded(Database):
     def delete_Concluded(self,number,clientid):
         self.delete_Row("concluded",f"number='{number}' AND clientid='{clientid}'")
     def update_Concluded(self,number,new_quantity):
-        self.update_Value("concluded",f"number={number}",f"{new_quantity}")
+        self.update_Value("concluded",f"number={number}",f"quantity={new_quantity}")
     def read_All_Concluded(self):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list=[]
@@ -187,7 +187,7 @@ class Orders(Database):
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number='{number}' AND clientid='{clientid}'")
     def update_Order(self,number,new_quantity):
-        self.update_Value("orders",f"number={number}",f"{new_quantity}")
+        self.update_Value("orders",f"number={number}",f"quantity={new_quantity}")
     def read_All_Orders(self):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list=[]
@@ -271,7 +271,15 @@ class Days(Database):
             self.Update_Order(i,"4",Ord4)
             i=i+1
         self.Delete_Day(days)    
-            
+class PieceTime(Database):
+    def add_Piece(self,piecetype,time):
+         self.insert_Row("piecetime",f"{piecetype},'{time}'")
+    def delete_Piece(self,piecetype):
+        self.delete_Row("piecetime",f"piecetype='{piecetype}'")
+    def Update_Time(self,piecetype,time):
+        self.update_Value("piecetime",f"piecetype={piecetype}",f"time={time}")
+        
+
 '''
 Example code
 

@@ -166,8 +166,11 @@ class Orders(Database):
     # read_Order_Number_X returns an array with the order with the number X.
     # read_X_Orders returns an array with X number of orders 
     
-
+    def check_Order(self,order):
+        return self.check_Amount("orders",f"number='{order}'")
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
+        if(self.check_Order("number"))==True:
+            number=number*97
         cl=Clients()
         if cl.check_Client(clientid) == True:
             self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")

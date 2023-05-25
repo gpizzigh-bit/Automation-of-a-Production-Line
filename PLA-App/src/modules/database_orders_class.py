@@ -170,10 +170,10 @@ class Orders(Database):
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
         cl=Clients()
         if cl.check_Client(clientid) == True:
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         else :
             cl.add_Client(clientid)
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
+            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         cl.close()
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number={number} AND clientid={clientid}")
@@ -222,7 +222,7 @@ class Clients(Database):
     def add_Client(self,client_name):
         self.insert_Row("clients",f"'{client_name}'")
     def delete_Client(self,client_name):
-        self.delete_Row("clients",f"name='{client_name}'")
+        self.delete_Row("clients",f"clientid='{client_name}'")
     def check_Client(self,clientid):
         return self.check_Amount("clients",f"clientid='{clientid}'")
 

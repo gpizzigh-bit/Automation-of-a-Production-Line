@@ -176,7 +176,7 @@ class Orders(Database):
             self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         cl.close()
     def delete_Order(self,number,clientid):
-        self.delete_Row("orders",f"number={number} AND clientid={clientid}")
+        self.delete_Row("orders",f"number='{number}' AND clientid='{clientid}'")
     def update_Order(self,number,new_quantity):
         self.update_Value("orders",f"number={number}",f"{new_quantity}")
     def read_All_Orders(self):

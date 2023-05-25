@@ -17,7 +17,7 @@ RESTOCK_LIMIT_BY_DAY = 5
 
 
 def request_piece(workpiece, status):
-    return {"worpiece": workpiece, "status": status}
+    return {"workpiece": workpiece, "status": status}
 
 
 def get_manufacturing_days(order_type):
@@ -98,7 +98,36 @@ class Scheduler:
         self.request_lock_current_day = False
 
     def run(self):
+        if self.request_lock_current_day:
+
+            self.nested_result_list = []
+            self.order_list = []
+            # TODO don't connect to the database inside the mps this is slowing down execution
+            self._parse_data()
+            self.find_last_deadline()
+            self.find_total_time()
+
+            for order_number in range(0, len(self.order_list)):
+                # for order_number in range(0, 3):
+                self.schedule_order(order_number)
+
+            self.resolve_all_conflicts()
+
+            if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT: # 4
+                # Request a day to only deliver stored ready pieces
+                self.request_delivery_day()
+
+            self.check_warehouse_status()
+            print(self.request_lock_current_day)
+
+            self.lock_current_day()
+            self.request_lock_current_day = False
+
+            return self.nested_result_list
+
+    def first_run(self):
         self.nested_result_list = []
+        self.order_list = []
         # TODO don't connect to the database inside the mps this is slowing down execution
         self._parse_data()
         self.find_last_deadline()
@@ -110,15 +139,11 @@ class Scheduler:
 
         self.resolve_all_conflicts()
 
-        if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:
+        if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT: #4
             # Request a day to only deliver stored ready pieces
             self.request_delivery_day()
 
         self.check_warehouse_status()
-
-        if self.request_lock_current_day:
-            self.lock_current_day()
-            self.request_lock_current_day = False
 
         return self.nested_result_list
 
@@ -261,8 +286,8 @@ class Scheduler:
 
     def check_warehouse_status(self):
         # connect to the database of the warehouse
-        test_value_p1 = 5
-        test_value_p2 = 10
+        test_value_p1 = 40
+        test_value_p2 = 60
         # compare to the total requested by the pending orders
         if test_value_p1 <= RESTOCK_THRESHOLD["P1"] and test_value_p2 <= RESTOCK_THRESHOLD["P2"]:
             # if bellow limit of the threshold request a restocking day
@@ -283,9 +308,11 @@ class Scheduler:
     def lock_current_day(self):
         # copy the current day on a self list
         self.current_day = self.nested_result_list[0].copy()
-        self.nested_result_list.pop(0)
-        for i in range(len(self.nested_result_list)):
-            self.nested_result_list[i] = self.nested_result_list[i][:]
+        # self.nested_result_list.pop(0)
+        del self.nested_result_list[0]
+        print(self.nested_result_list[0])
+        # for i in range(len(self.nested_result_list)):
+        #     self.nested_result_list[i+1] = self.nested_result_list[i+1][:]
 
     def show_schedule(self):
         day = 0

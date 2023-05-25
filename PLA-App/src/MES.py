@@ -6,25 +6,36 @@
 #from modules import tcp_comm
 
 from opcua import Client
+from collections import Counter
 
 """
 url = "opc.tcp://localhost:4840"
 client = Client(url)
 """
 
+P3 = 'P3'
+done = 0
+
 #exemplo de dados recebidos do erp
-pedidos = {
-    'pedido1': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido2': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido3': {'workpiece': "p3", 'todo': "makeANDstore"},
-    'pedido4': {'workpiece': "p3", 'todo': "makeANDstore"}
-}
+requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
+           {'workpiece': 'P7', 'status': 'store2deliver'},
+           {'workpiece': 'P7', 'status': 'store2deliver'},
+           {'workpiece': 'P6', 'status': 'makeANDdeliver'}]
+
+
+# TODO toda vez que aparece um status de "makeANDdeliver" vc tem que checar no armazem antes de enviar
+# se existem outras peças com o mesmo workpiece e o status store2deliver
 
 #estado das maquinas:
 M1livre = True  #T1, T2, T3
 M2livre = True  #T1, T3, T4
 M3livre = True  #T2, T3, T4
 M4livre = True  #T1, T3, T4
+
+
+
+           # 1      2     3     4
+machines = [True, True, True, True]
 
 machineUsed = 1
 
@@ -53,20 +64,33 @@ def makeP3(tipopeca, entrega):
     #alterar variaveis do plc de forma a iniciar a producao na maquina que ficou livre
     print(f'a peça esta a ser feita na maquina {machineUsed}')
 
+
+def check_for_availability() -> bool:
+    for available_machine in range(0,len(machines)):
+        if machines[available_machine] == True:
+            return available_machine+1
+
+def total_equal_pieces():
+    aux = []
+    for order in requests:
+        aux.append(order['workpiece'])
+
+    count = Counter(aux) # {'P7':3, 'P6': 1}
+    most_common = count.most_common(1) # {'P7': 3}
+    return most_common[0][1] # 3
+
+
+def machines_to_use():
+
+
 def switch_case(x):
-    if x == "p3":
+    if x == P3:
         print("You are going to make a P3")
-        #showTerminal(produced, pending)
         # P2->P3 (T2,10s)
-        makeP3(client, pedidos['pedido1']['workpiece'], pedidos['pedido1']['todo'])
-        #showTerminal(produced, pending)
-        # marcar a maquina como livre
 
     elif x == "p4":
         print("You are going to make a P4")
         # P2->P4 (T3,10s)
-        # time.sleep(10)
-        # marcar a maquina como livre
 
     elif x == "p5":
         print("You are going to make a P5")
@@ -74,7 +98,7 @@ def switch_case(x):
 
     elif x == "p6":
         print("You are going to make a P6")
-        # P2->P3->P6 (T2,10s + T1,20s)  OU P1->P6 (T1,20s)
+        # P1->P6 (T1,20s)
 
     elif x == "p7":
         print("You are going to make a P7")
@@ -82,7 +106,7 @@ def switch_case(x):
 
     elif x == "p8":
         print("You are going to make a P8")
-        # P2->P3->P6->P8 (10s + 20s + 30s) OU P1->P6->P8 (20s + 30s)
+        # P1->P6->P8 (20s + 30s)
 
     elif x == "p9":
         print("You are going to make a P9")
@@ -91,7 +115,9 @@ def switch_case(x):
         print("error")
 
 
-def showTerminal(produced, pending):
+def showTerminal():
+    pending = len(requests)
+    produced = done
     print(f'Number of produced pieces: {produced}\nNumber of pending pieces: {pending}')
 
     """
@@ -136,12 +162,14 @@ if __name__ == '__main__':
     #tcp_process = multiprocessing.Process(target=process_tcp_comm)
     #tcp_process.start()
 
+    """while True:
+        if pedidos != 0:
+            switch_case(pedidos['pedido1']['workpiece'])
+            del pedidos['pedido1']"""
 
+    #switch_case(requests['pedido1']['workpiece'])
 
-    print(pedidos['pedido1']['workpiece'])
-    print(pedidos['pedido1']['todo'])
-
-    switch_case(pedidos['pedido1']['workpiece'])
+    total_equal_pieces()
 
           
     """

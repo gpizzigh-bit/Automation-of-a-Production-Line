@@ -234,7 +234,7 @@ class Clients(Database):
         self.delete_Row("clients",f"clientid='{client_name}'")
     def check_Client(self,clientid):
         return self.check_Amount("clients",f"clientid='{clientid}'")
-class MPS(Database):
+class Days(Database):
     def Insert_Day(self,Day,Order1,Order2,Order3,Order4):
         self.insert_Row("Days",f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
     def Delete_Day(self,Day):

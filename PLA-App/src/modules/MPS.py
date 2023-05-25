@@ -7,6 +7,8 @@ import math
 
 from .database_orders_class import Orders
 
+# from ..constants import local_constants
+
 STORE_GLOBAL = "makeANDstore"
 DELIVER_GLOBAL = "makeANDdeliver"
 STORE2DELIVER = "store2deliver"
@@ -83,6 +85,40 @@ def contains_only_dict(request):
     return True
 
 
+def find_supplier(piece_type: str, quantity: int, delivery_time: int):
+    """
+    Find a possible supplier for the given piece type, quantity and delivery time based on the smallest total cost.
+
+    :param piece_type: The desired piece type (e.g. "P1" or "P2")
+    :param quantity: The desired quantity
+    :param delivery_time: The desired delivery time in days
+    :return: A possible supplier for the given request
+    """
+    suppliers = {
+        'A': {
+            'P1': {'delivery_time': 3, 'price': 10, 'min_order_quantity': 20},
+            'P2': {'delivery_time': 5, 'price': 12, 'min_order_quantity': 30}
+        },
+        'B': {
+            'P1': {'delivery_time': 4, 'price': 9, 'min_order_quantity': 25},
+            'P2': {'delivery_time': 6, 'price': 11, 'min_order_quantity': 35}
+        },
+        'C': {
+            'P1': {'delivery_time': 1, 'price': 8, 'min_order_quantity': 15},
+            'P2': {'delivery_time': 2, 'price': 10, 'min_order_quantity': 20}
+        }
+    }
+    # Schedule the purchase of pieces based on delivery time and total cost simultaneously
+    sorted_suppliers = sorted(suppliers.items(), key=lambda x: (x[1][piece_type]['delivery_time'],
+                                                                x[1][piece_type]['price'] * max(quantity,
+                                                                                                x[1][piece_type][
+                                                                                                    'min_order_quantity'])))
+    for supplier in sorted_suppliers:
+        if supplier[1][piece_type]['delivery_time'] <= delivery_time:
+            return supplier[0]
+    return None
+
+
 class Scheduler:
 
     def __init__(self):
@@ -113,12 +149,11 @@ class Scheduler:
 
             self.resolve_all_conflicts()
 
-            if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT: # 4
+            if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
                 # Request a day to only deliver stored ready pieces
                 self.request_delivery_day()
 
             self.check_warehouse_status()
-            print(self.request_lock_current_day)
 
             self.lock_current_day()
             self.request_lock_current_day = False
@@ -139,7 +174,7 @@ class Scheduler:
 
         self.resolve_all_conflicts()
 
-        if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT: #4
+        if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
             # Request a day to only deliver stored ready pieces
             self.request_delivery_day()
 
@@ -310,7 +345,6 @@ class Scheduler:
         self.current_day = self.nested_result_list[0].copy()
         # self.nested_result_list.pop(0)
         del self.nested_result_list[0]
-        print(self.nested_result_list[0])
         # for i in range(len(self.nested_result_list)):
         #     self.nested_result_list[i+1] = self.nested_result_list[i+1][:]
 

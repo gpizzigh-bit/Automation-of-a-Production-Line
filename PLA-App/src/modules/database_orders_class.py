@@ -105,21 +105,27 @@ class Database():
         self.cur.execute(query)
         self.conn.commit()
         return self.cur.fetchone()[0]  
-
 class Concluded(Database):
 
     # # Concluded orders table subclass
     # Add_Order adds an order number to the concluded orders table
     # Delete_Order deletes an order by its number
     # Read All_Orders returns an array of strings, each string corresponds to an order and contains all its values: number,piecetype,date,etc
-    def add_Concluded(self,number,workpiece,quantity,duedate,latepen,earlypen,client):
-        clientid=self.read_Value("clients","clientid",f"name='{client}'")
-        self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}',{clientid}")
-    def delete_Order(self,number,clientid):
-        self.delete_Row("concluded",f"number={number} AND clientid={clientid}")
-    def update_Order(self,number,new_quantity):
-        self.update_Value("concluded",f"number={number}",f"{new_quantity}")
-    def read_All_Orders(self):
+    def check_Concluded(self,order):
+        return self.check_Amount("concluded",f"number='{order}'")
+    def add_Concluded(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
+        cl=Clients()
+        if cl.check_Client(clientid) == True:
+            self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+        else :
+            cl.add_Client(clientid)
+            self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+        cl.close()
+    def delete_Concluded(self,number,clientid):
+        self.delete_Row("concluded",f"number='{number}' AND clientid='{clientid}'")
+    def update_Concluded(self,number,new_quantity):
+        self.update_Value("concluded",f"number={number}",f"quantity={new_quantity}")
+    def read_All_Concluded(self):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list=[]
         rows=self.read_Table("concluded")
@@ -129,7 +135,7 @@ class Concluded(Database):
             result_list.append(row_string)
 
         return result_list   
-    def read_Order_Number_X(self,order_number):
+    def read_Concluded_Number_X(self,order_number):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         rows=self.read_Values("concluded","number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number={order_number}")
         result_list=[]
@@ -139,7 +145,7 @@ class Concluded(Database):
             result_list.append(row_string)
         return result_list
     
-    def read_X_Orders(self,number_of_orders):
+    def read_X_Concluded(self,number_of_orders):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         rows=self.read_Table("concluded")
         result_list=[]
@@ -152,9 +158,9 @@ class Concluded(Database):
             result_list.append(row_string)
             a=a+1
         return result_list
-
-
-
+    def Latest_Due_Date(self):
+        Latest=self.get_Max("concluded","duedate")
+        return Latest
 class Orders(Database):
 
     # Orders table subclass
@@ -166,8 +172,11 @@ class Orders(Database):
     # read_Order_Number_X returns an array with the order with the number X.
     # read_X_Orders returns an array with X number of orders 
     
-
+    def check_Order(self,order):
+        return self.check_Amount("orders",f"number='{order}'")
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
+        if(self.check_Order("number"))==True:
+            number=number*97
         cl=Clients()
         if cl.check_Client(clientid) == True:
             self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
@@ -178,7 +187,7 @@ class Orders(Database):
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number='{number}' AND clientid='{clientid}'")
     def update_Order(self,number,new_quantity):
-        self.update_Value("orders",f"number={number}",f"{new_quantity}")
+        self.update_Value("orders",f"number={number}",f"quantity={new_quantity}")
     def read_All_Orders(self):
         col_names=["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list=[]
@@ -222,11 +231,10 @@ class Clients(Database):
     def add_Client(self,client_name):
         self.insert_Row("clients",f"'{client_name}'")
     def delete_Client(self,client_name):
-        self.delete_Row("clients",f"name='{client_name}'")
+        self.delete_Row("clients",f"clientid='{client_name}'")
     def check_Client(self,clientid):
         return self.check_Amount("clients",f"clientid='{clientid}'")
-
-class MPS(Database):
+class Days(Database):
     def Insert_Day(self,Day,Order1,Order2,Order3,Order4):
         self.insert_Row("Days",f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
     def Delete_Day(self,Day):
@@ -263,7 +271,15 @@ class MPS(Database):
             self.Update_Order(i,"4",Ord4)
             i=i+1
         self.Delete_Day(days)    
-            
+class PieceTime(Database):
+    def add_Piece(self,piecetype,time):
+         self.insert_Row("piecetime",f"{piecetype},'{time}'")
+    def delete_Piece(self,piecetype):
+        self.delete_Row("piecetime",f"piecetype='{piecetype}'")
+    def Update_Time(self,piecetype,time):
+        self.update_Value("piecetime",f"piecetype={piecetype}",f"time={time}")
+        
+
 '''
 Example code
 

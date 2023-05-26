@@ -286,9 +286,10 @@ class Stock(Database):
         self.delete_Row("stock",f"piece={type}")
     def update_Stock(self,type,new_quantity):
         self.update_Value("stock",f"piece={type}",f"quantity={new_quantity}")
-    def update_Stock_P1_P2(self,P1,P2):
+    def update_Stock_P1(self,P1):
         self.update_Stock("P1",P1)
-        self.update_Stock("P2",P2)      
+    def update_Stock_P2(self,P2):
+        self.update_Stock("P2",P2)
     def read_Stock_P1(self):
         return self.read_Value("stock","quantity","piece='P1'")
     def read_Stock_P2(self):

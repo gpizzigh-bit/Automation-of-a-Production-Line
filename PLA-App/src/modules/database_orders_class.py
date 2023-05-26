@@ -275,7 +275,9 @@ class PieceTime(Database):
     def delete_Piece(self,piecetype):
         self.delete_Row("piecetime",f"piecetype='{piecetype}'")
     def Update_Time(self,piecetype,time):
-        self.update_Value("piecetime",f"piecetype={piecetype}",f"time={time}")
+        self.update_Value("piecetime",f"piecetype='{piecetype}'",f"time={time}")
+    def read_PieceTime(self,piecetype):
+        self.read_Value("piecetype","time",f"piecetype='{piecetype}'")
 class Stock(Database):
 
     #Stock table subclass

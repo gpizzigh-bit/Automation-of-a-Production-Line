@@ -22,7 +22,6 @@ def list_to_string(lst):
     return "\n".join(str_lst)
 
 
-
 class TimeDisplay(Static):
     """A widget to display elapsed time."""
 
@@ -146,6 +145,15 @@ class ErpTerminal(App):
                     print(mps.get_plans_list())
                     for plans in mps.get_plans_list():
                         plans_obj = Plans()
+                        if plans == "P1 and P2 restock":
+                            plans_obj.set_plan(list_to_string(plans) + "\nSupplier for P1: " + mps.get_suppliers()[0] +
+                                               "\n Supplier for P2: " + mps.get_suppliers()[1])
+                        elif plans == "P1 restock":
+                            plans_obj.set_plan(list_to_string(plans) + "\nSupplier for P1: " + mps.get_suppliers()[0])
+
+                        elif plans == "P2 restock":
+                            plans_obj.set_plan(list_to_string(plans) + "\nSupplier for P2: " + mps.get_suppliers()[1])
+
                         plans_obj.set_plan(list_to_string(plans))
                         yield plans_obj
 

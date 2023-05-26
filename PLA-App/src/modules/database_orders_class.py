@@ -285,7 +285,7 @@ class Stock(Database):
     def add_Piece_Type(self,type,quantity):
         self.insert_Row("stock",f"'{type}',{quantity}")
     def delete_Piece_Type(self,type):
-        self.delete_Row("stock",f"piece={type}")
+        self.delete_Row("stock",f"piece='{type}'")
     def update_Stock(self,type,new_quantity):
         self.update_Value("stock",f"piece='{type}'",f"quantity={new_quantity}")
     def update_Stock_P1(self,P1):
@@ -296,7 +296,29 @@ class Stock(Database):
         return self.read_Value("stock","quantity","piece='P1'")
     def read_Stock_P2(self):
         return self.read_Value("stock","quantity","piece='P2'")  
-
+class ERP(Database):
+    def add_Row(self,number,dc,pc,ad,dd,tc):
+        self.insert_Row("erp",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}'")
+    def update_dc(self,number,dc):
+        self.update_Value("erp",f"number='{number}'",f"dc='{dc}'")
+    def update_pc(self,number,pc):
+        self.update_Value("erp",f"number='{number}'",f"pc='{pc}'")
+    def update_ad(self,number,ad):
+        self.update_Value("erp",f"number='{number}'",f"dc='{ad}'")
+    def update_dd(self,number,dd):
+        self.update_Value("erp",f"number='{number}'",f"dd='{dd}'")
+    def update_dc(self,number,tc):
+        self.update_Value("erp",f"number='{number}'",f"tc='{tc}'")
+    def read_dc(self,number):
+        return self.read_Value("erp","dc",f"number='{number}'")
+    def read_pc(self,number):
+        return self.read_Value("erp","pc",f"number='{number}'")
+    def read_ad(self,number):
+        return self.read_Value("erp","ad",f"number='{number}'")
+    def read_dd(self,number):
+        return self.read_Value("erp","dd",f"number='{number}'")
+    def read_tc(self,number):
+        return self.read_Value("erp","tc",f"number='{number}'")
 '''
 Example code
 

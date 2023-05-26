@@ -276,7 +276,19 @@ class PieceTime(Database):
         self.delete_Row("piecetime",f"piecetype='{piecetype}'")
     def Update_Time(self,piecetype,time):
         self.update_Value("piecetime",f"piecetype={piecetype}",f"time={time}")
-        
+class Stock(Database):
+
+    #Stock table subclass
+
+    def add_Piece_Type(self,type,quantity):
+        self.insert_Row("stock",f"'{type}',{quantity}")
+    def delete_Piece_Type(self,type):
+        self.delete_Row("stock",f"piece={type}")
+    def update_Stock(self,type,new_quantity):
+        self.update_Value("stock",f"piece={type}",f"quantity={new_quantity}")
+    def update_Stock_P1_P2(self,P1,P2):
+        self.update_Stock("P1",P1)
+        self.update_Stock("P2",P2)        
 
 '''
 Example code

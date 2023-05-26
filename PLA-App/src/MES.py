@@ -7,9 +7,9 @@ import pickle
 from modules import tcp_comm
 
 from opcua import Client, ua
+import pyfiglet
+from termcolor import colored
 import time
-
-done = 0
 
 
 def process_tcp_comm():
@@ -31,18 +31,25 @@ requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
 
 # TODO toda vez que aparece um status de "makeANDdeliver" vc tem que checar no armazem antes de enviar
 # se existem outras peças com o mesmo workpiece e o status store2deliver
+#store2make sao peças usadas para fazer outras. nao devem ser enviadas com o make and deliver, mm  q sejam do mm tipo
 
-def switch_case(x, machine_number, id, client, todo):
+def switch_case(x, machine_number, todo, c, a):
+    c=c
+    p = int(x[1:])
     if x == 'restock day':
-        print("You are going to restock")
+        #fazer o restock
+        print('restock')
 
     elif x == 'P3':
         print("You are going to make a P3 from a P2, using a T2")
-        towrite = 2  # peça a pegar do armazem
+        towrite = 1  # peça a pegar do armazem - ERRADA !!!!!!!!!
         if machine_number == 1:
-            string1="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            string2="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
+            string1 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
+            string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
+            #decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
             send_from_wh_to_machine(string1, string2, towrite)
+            #fazer a peça e enviar para o armazem
+            status_decision(c, p, todo)
 
         elif machine_number == 3:
             string1="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
@@ -99,6 +106,7 @@ def switch_case(x, machine_number, id, client, todo):
         #elif machine_number == 3:
         #elif machine_number == 4:
 
+
     elif x == 'P8':
         print("You are going to make a P8 from a P6, using a T3")
         towrite = 6  # peça a pegar do armazem
@@ -137,28 +145,185 @@ def send_from_machine1_to_machine2(string3):
     var.set_value(True)
     print(f'ja alterada:{var.get_value()}')
 
+def status_decision(c,p, todo): #por acabar !!!!
+    if todo == 'store2deliver':
+        if p == 3:
+            c[0] = c[0] + 1
+        elif p == 4:
+            c[1] = c[1] + 1
+        elif p == 5:
+            c[2] = c[2] + 1
+        elif p == 6:
+            c[3] = c[3] + 1
+        elif p == 7:
+            c[4] = c[4] + 1
+        elif p == 8:
+            c[5] = c[5] + 1
+        elif p == 9:
+            c[6] = c[6] + 1
+    elif todo == 'makeANDdeliver':
+        n=c[p-3]
+        #enviar as peças. parametros: p (inteiro) ; numero de peças: n
+        show_terminal_shipping(requests, time, p, n)
+        c[p-3]=0
 
-def show_terminal():
-    pending = len(requests)
-    produced = done
-    print(f'Number of produced pieces: {produced}\nNumber of pending pieces: {pending}')
+def show_terminal(requests, id, time, init):
+    print('-----------------------------------------------------------------------')
+    title=pyfiglet.figlet_format('MES TERMINAL')
+    title=colored(title, "blue")
+    print(title)
+    print('-----------------------------------------------------------------------')
+    produced=id
+    pending = 4-produced
+    workpiece_number=[0,0,0,0]
+    string1='               First Order:'
+    stringf1=colored(string1, attrs=['bold'])
+    string2='               Second Order:'
+    stringf2 = colored(string2, attrs=['bold'])
+    string3='               Third Order:'
+    stringf3 = colored(string3, attrs=['bold'])
+    string4='               Fourth Order:'
+    stringf4 = colored(string4, attrs=['bold'])
+    string5='         Status:'
+    string6='        Status:'
+    stringf5 = colored(string5, attrs=['bold'])
+    stringf6 = colored(string6, attrs=['bold'])
+    if len(requests)==1:
+        string ='                             RESTOCK DAY'
+        stringg='          pieces P1 and P2 are being stored in the warehouse'
+        stringf = colored(string, 'red', attrs=['bold'])
+        print(stringf)
+        print(stringg)
+    elif len(requests)==4:
+        string = '                  Number of produced pieces today:'
+        stringf = colored(string, 'yellow', attrs=['bold'])
+        print(f'{stringf} {produced}')
+        string = '                     Number of pending pieces:'
+        stringf = colored(string, 'yellow', attrs=['bold'])
+        print(f'{stringf} {pending}\n')
+        string = '                              Orders:'
+        stringf = colored(string, 'red', attrs=['bold'])
+        print(stringf)
+        for i in range(4):
+            piece = requests[i]['workpiece']
+            number = int(piece[1:])
+            workpiece_number[i] = number
+        if id==0:
+            if init==1:
+                print(f'{stringf1} P{workpiece_number[0]}{stringf5} About to start')
+            elif init==0:
+                print(f'{stringf1} P{workpiece_number[0]}{stringf5} Making the piece')
+            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Waiting')
+            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Waiting')
+            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Waiting\n')
+        elif id==1:
+            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
+            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Making the piece')
+            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Waiting')
+            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Waiting\n')
+        elif id==2:
+            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
+            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
+            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Making the piece')
+            print(f'{stringf4} P{workpiece_number[3]} Waiting\n')
+        elif id==3:
+            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
+            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
+            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Done')
+            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Making the piece\n')
+        string = '           Time passed since production started:'
+        stringf = colored(string, 'green', attrs=['bold'])
+        print(f'{stringf} {time} segundos')
 
-    """
-       interface:
-   Monitor the current production order list, as well as the status of each order received from the ERP. The status
-   includes the number of pieces already produced, the number of pending pieces, the total production time of the order, etc. 
-   The user interface should also provide enough information for the user to determine the status of that algorithm.
-    """
+    print('-----------------------------------------------------------------------')
 
-'''
-def process_tcp_comm():
-    client_erp = tcp_comm.TCPClient()
-    print("receiving...")
-    client_erp.connect()
-    while True:
-        message = client_erp.receive(1024)
-        print(f"Received: {message}")
-'''
+def show_terminal_end(requests, time):
+    print('-----------------------------------------------------------------------')
+    title = pyfiglet.figlet_format('MES TERMINAL')
+    title = colored(title, "blue")
+    print(title)
+    print('-----------------------------------------------------------------------')
+    produced = 4
+    pending = 0
+    workpiece_number = [0, 0, 0, 0]
+    string1 = '               First Order:'
+    stringf1 = colored(string1, attrs=['bold'])
+    string2 = '               Second Order:'
+    stringf2 = colored(string2, attrs=['bold'])
+    string3 = '               Third Order:'
+    stringf3 = colored(string3, attrs=['bold'])
+    string4 = '               Fourth Order:'
+    stringf4 = colored(string4, attrs=['bold'])
+    string5 = '         Status:'
+    string6 = '        Status:'
+    stringf5 = colored(string5, attrs=['bold'])
+    stringf6 = colored(string6, attrs=['bold'])
+    if len(requests) == 1:
+        string = '                           RESTOCK FINISHED'
+        stringg = '            pieces P1 and P2 are now stored in the warehouse'
+        stringf = colored(string, 'red', attrs=['bold'])
+        print(stringf)
+        print(stringg)
+    elif len(requests) == 4:
+        string = '                  Number of produced pieces today:'
+        stringf = colored(string, 'yellow', attrs=['bold'])
+        print(f'{stringf} {produced}')
+        string = '                     Number of pending pieces:'
+        stringf = colored(string, 'yellow', attrs=['bold'])
+        print(f'{stringf} {pending}\n')
+        string = '                              Orders:'
+        stringf = colored(string, 'red', attrs=['bold'])
+        print(stringf)
+        for i in range(4):
+            piece = requests[i]['workpiece']
+            number = int(piece[1:])
+            workpiece_number[i] = number
+
+            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
+            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
+            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Done')
+            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Done\n')
+        string = '           Time passed since production started:'
+        stringf = colored(string, 'green', attrs=['bold'])
+        print(f'{stringf} {time} segundos')
+
+    print('-----------------------------------------------------------------------')
+
+"""
+interface:
+The status includes the number of pieces already produced, the number of pending pieces, the total production time of the order, etc. 
+The user interface should also provide enough information for the user to determine the status of that algorithm.
+"""
+
+def show_terminal_shipping(requests, time, p, n):
+    print('-----------------------------------------------------------------------')
+    title = pyfiglet.figlet_format('MES TERMINAL')
+    title = colored(title, "blue")
+    print(title)
+    print('-----------------------------------------------------------------------')
+    produced = 4
+    pending = 0
+
+    string = '                  Number of produced pieces today:'
+    stringf = colored(string, 'yellow', attrs=['bold'])
+    print(f'{stringf} {produced}')
+    string = '                     Number of pending pieces:'
+    stringf = colored(string, 'yellow', attrs=['bold'])
+    print(f'{stringf} {pending}\n')
+    n=str(n)
+    p=str(p)
+    string = '                   Delivering '+n
+    string = string+ " pieces of type P"+p
+    stringf = colored(string, 'red', attrs=['bold'])
+    print(f'{stringf}\n')
+
+    string = '           Time passed since production started:'
+    stringf = colored(string, 'green', attrs=['bold'])
+    print(f'{stringf} {time} segundos')
+
+    print('-----------------------------------------------------------------------')
+
+
 def get_requests():
     global requests
     tools_finais = [0, 0, 0, 0]
@@ -330,43 +495,45 @@ def count2(tools_iniciais, tools_finais, resultado):
                 k = k + 1
         print(j)"""
 
-#def count3(tools_iniciais, tools_finais, count, resultado):
-
 if __name__ == '__main__':
-    tcp_process = multiprocessing.Process(target=process_tcp_comm)
+    """tcp_process = multiprocessing.Process(target=process_tcp_comm)
     tcp_process.start()
 
-    #total_equal_pieces()
-    #print(requests[0]['workpiece'])
-    #print(get_tools_finais())
-    #switch_case(requests[0]['workpiece'])
-
-    #tools = [3, 4, 3, 4]  # tool ja montada em cada maquina
-    #requests_simple=get_requests()
-    #print(f'tipo de peça a fazer: {requests_simple}')
-    #print(f'resquests(piece number): {requests_simple}')
-    #print(f'requests(tool necessary):{get_tools_finais(get_requests())}')
-    #resultado = alocacao_pecas(tools, get_tools_finais(get_requests()))
-    #print(f'result:{resultado}')
+    
 
     # Connect to server
     url = "opc.tcp://localhost:4840"
     client = Client(url)
-    #client.connect()
+    client.connect()
+    c=[0,0,0,0,0,0,0]
 
-    size=len(requests)
-    id=0
+    while True:
+        #receive and store requests from the erp
+        size=len(requests)
+        id=0
+        show_terminal(requests, id, 0, 1)
+        a = time.time()
 
-    """for id in range(size):
-        string=requests[id]['workpiece']
-        todo=requests[id]['status']
-        switch_case(string, 1, id, client, todo)"""
+        for id in range(size):
+            show_terminal(requests, id, 0, 0)
+            string=requests[id]['workpiece']
+            todo=requests[id]['status']
+            #definir maquina a utilizar, excepto se for restock
+            switch_case(string, maquina_a_usar, todo, c, a)
+            b = time.time()
+            b=b-a
+            show_terminal_end(requests, b)"""
 
+    #dados para testar:
+    todo='store2deliver'
     string = 'P3'
     maquina_a_usar=1
-    #switch_case(string, maquina_a_usar, id, client)
+    id = 0
+    a=0
+    time = 2
+    show_terminal(requests, id, time, 1)
 
-    time.sleep(3)
+    #switch_case(string, maquina_a_usar, todo, a)
 
     #client.disconnect()
 

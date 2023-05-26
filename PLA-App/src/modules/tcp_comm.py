@@ -10,9 +10,10 @@ class TCPClient:
         self.ip = global_ip
         self.port = global_port
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect()
+        print(f" [TCP CLIENT] Waiting for connection... over {self.ip} : {self.port} ")
 
     def connect(self):
-        print(f" [TCP CLIENT] Waiting for connection... over {self.ip} : {self.port} ")
         self.socket.connect((self.ip, self.port))
 
     def send(self, message):
@@ -37,7 +38,7 @@ class TCPServer:
         self.connection, self.address = self.socket.accept()
 
     def receive(self, buffer_size):
-        return self.connection.recv(buffer_size)
+        return pickle.loads(self.connection.recv(buffer_size))
 
     def send(self, message):
         data = pickle.dumps(message)

@@ -288,7 +288,11 @@ class Stock(Database):
         self.update_Value("stock",f"piece={type}",f"quantity={new_quantity}")
     def update_Stock_P1_P2(self,P1,P2):
         self.update_Stock("P1",P1)
-        self.update_Stock("P2",P2)        
+        self.update_Stock("P2",P2)      
+    def read_Stock_P1(self):
+        return self.read_Value("stock","quantity","piece='P1'")
+    def read_Stock_P2(self):
+        return self.read_Value("stock","quantity","piece='P2'")  
 
 '''
 Example code

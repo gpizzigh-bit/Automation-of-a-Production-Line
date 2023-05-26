@@ -22,7 +22,6 @@ def list_to_string(lst):
     return "\n".join(str_lst)
 
 
-
 class TimeDisplay(Static):
     """A widget to display elapsed time."""
 

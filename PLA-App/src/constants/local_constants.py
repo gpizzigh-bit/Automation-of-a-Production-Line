@@ -8,8 +8,8 @@ suppliers = {
         'P2': {'delivery_time': 2, 'price': 15, 'min_order_quantity': 8}
     },
     'C': {
-        'P1': {'delivery_time': 1, 'price': 4, 'min_order_quantity': 4},
-        'P2': {'delivery_time': 1, 'price': 4, 'min_order_quantity': 4}
+        'P1': {'delivery_time': 1, 'price': 55, 'min_order_quantity': 4},
+        'P2': {'delivery_time': 1, 'price': 18, 'min_order_quantity': 4}
     }
 }
 

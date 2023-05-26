@@ -79,48 +79,14 @@ if __name__ == '__main__':
         # terminal.run()
 
         mps.first_run()
-        terminal.show_new_plans(mps)
+        #terminal.show_new_plans(mps)
         # mps.show_schedule()
-
-        # current_time = start_time = time.monotonic()
-        # next_time = start_time + 2
-        # while current_time - start_time <= day_time:
-        #     current_time = time.monotonic()
-        #     # print(current_time - start_time)
-        #     if current_time - start_time >= day_time:
-        #         # day is over reset start time
-        #         day_index += 1
-        #         if day_index >= len(mps.get_plans_list()):
-        #             sys.exit(1)
-        #         print(
-        #             f"------------------------------------------------ day: {day_index} "
-        #             f"---------------------------------------")
-        #         # mps.show_schedule()
-        #         start_time = current_time
-        #         next_time = start_time + 2
-        #         # lock the current day on the mps and re-run the algorithm
-        #         mps.request_lock_current_day = True
-        #         mps.lock_current_day()
-        #         mps.run()
-        #         mps.show_schedule()
-        #         terminal.show_new_plans(mps)
-        #         #
-        #     elif current_time >= next_time:
-        #         next_time += 2
-        #         print(current_time)
-        #         # current day is running...
-        #         # after 2 seconds
-        #         # send today orders to the ERP and wait a feedback
-        #         message = mps.get_plans_list()[day_index]
-        #         print(message)
-        #         comm_to_mes.set_msg(message)
-        #     continue
 
         current_time = start_time = 0
         next_time = start_time + 2
         send_current_day = True
         while current_time - start_time <= day_time:
-            time.sleep(1)
+            time.sleep(1) # current time is equal to 1s
             current_time += 1
             if current_time - start_time >= day_time:
                 day_index += 1
@@ -133,19 +99,17 @@ if __name__ == '__main__':
                 mps.request_lock_current_day = True
                 mps.lock_current_day()
                 mps.run()
+                mps.show_schedule()
                 send_current_day = True
                 #mps.show_schedule()
                 #terminal.show_new_plans(mps)
             #elif current_time >= next_time:
             elif send_current_day is True:
                 next_time = current_time + 2
-                print(day_index)
                 message = mps.get_plans_list()[day_index]
-                print(message)
                 comm_to_mes.set_msg(message)
                 send_current_day = False
             elif comm_to_mes.get_feedback_msg() == FEEDBACK_MSG:
-                print(comm_to_mes.get_feedback_msg())
                 comm_to_mes.set_msg(None)
 
         p.kill()

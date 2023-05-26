@@ -380,8 +380,6 @@ def check_if_possible(i, j, tools_finais):
             return 1
 
     return 0
-
-
 def alocacao_pecas(tools_iniciais, tools_finais):
     i = 0
     j = 0
@@ -446,8 +444,6 @@ def alocacao_pecas(tools_iniciais, tools_finais):
         print(f"Machine {i + 1}: tool {resultado[0][i]} , is going to make a piece with the id={resultado[1][i]}")
 
     return resultado
-
-
 def count1(tools_iniciais, tools_finais, resultado):
     j = 0
     i = 0
@@ -466,8 +462,6 @@ def count1(tools_iniciais, tools_finais, resultado):
             i = 4
         else:
             i = i + 1
-
-
 def count2(tools_iniciais, tools_finais, resultado):
     j = [[0, 0], [0, 0]]
     i = 0

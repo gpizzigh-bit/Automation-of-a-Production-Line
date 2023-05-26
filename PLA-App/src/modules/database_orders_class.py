@@ -297,7 +297,7 @@ class Stock(Database):
     def read_Stock_P2(self):
         return self.read_Value("stock","quantity","piece='P2'")  
 class ERP(Database):
-    def add_Row(self,number,dc,pc,ad,dd,tc):
+    def add_ERP_Row(self,number,dc,pc,ad,dd,tc):
         self.insert_Row("erp",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}'")
     def update_dc(self,number,dc):
         self.update_Value("erp",f"number='{number}'",f"dc='{dc}'")
@@ -319,6 +319,8 @@ class ERP(Database):
         return self.read_Value("erp","dd",f"number='{number}'")
     def read_tc(self,number):
         return self.read_Value("erp","tc",f"number='{number}'")
+    def delete_ERP_row(self,number):
+        self.delete_Row("erp",f"number='{number}'")
 '''
 Example code
 

@@ -175,14 +175,12 @@ class Orders(Database):
     def check_Order(self,order):
         return self.check_Amount("orders",f"number='{order}'")
     def add_Order(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
-        if(self.check_Order("number"))==True:
-            number=number*97
         cl=Clients()
         if cl.check_Client(clientid) == True:
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+            self.insert_Row("orders",f"'{number}','{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         else :
             cl.add_Client(clientid)
-            self.insert_Row("orders",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+            self.insert_Row("orders",f"'{number}','{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         cl.close()
     def delete_Order(self,number,clientid):
         self.delete_Row("orders",f"number='{number}' AND clientid='{clientid}'")

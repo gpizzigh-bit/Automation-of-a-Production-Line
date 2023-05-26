@@ -116,10 +116,10 @@ class Concluded(Database):
     def add_Concluded(self,number,workpiece,quantity,duedate,latepen,earlypen,clientid):
         cl=Clients()
         if cl.check_Client(clientid) == True:
-            self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+            self.insert_Row("concluded",f"'{number}','{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         else :
             cl.add_Client(clientid)
-            self.insert_Row("concluded",f"{number},'{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
+            self.insert_Row("concluded",f"'{number}','{workpiece}','{quantity}','{duedate}','{latepen}','{earlypen}','{clientid}'")
         cl.close()
     def delete_Concluded(self,number,clientid):
         self.delete_Row("concluded",f"number='{number}' AND clientid='{clientid}'")

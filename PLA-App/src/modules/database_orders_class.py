@@ -296,31 +296,45 @@ class Stock(Database):
         return self.read_Value("stock","quantity","piece='P1'")
     def read_Stock_P2(self):
         return self.read_Value("stock","quantity","piece='P2'")  
-class ERP(Database):
-    def add_ERP_Row(self,number,dc,pc,ad,dd,tc):
-        self.insert_Row("erp",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}'")
+class statistics(Database):
+    def add_statistics_Row(self,number,dc,pc,ad,dd,tc,rc):
+        self.insert_Row("statistics",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
     def update_dc(self,number,dc):
-        self.update_Value("erp",f"number='{number}'",f"dc='{dc}'")
+        self.update_Value("statistics",f"number='{number}'",f"dc='{dc}'")
     def update_pc(self,number,pc):
-        self.update_Value("erp",f"number='{number}'",f"pc='{pc}'")
+        self.update_Value("statistics",f"number='{number}'",f"pc='{pc}'")
     def update_ad(self,number,ad):
-        self.update_Value("erp",f"number='{number}'",f"dc='{ad}'")
+        self.update_Value("statistics",f"number='{number}'",f"dc='{ad}'")
     def update_dd(self,number,dd):
-        self.update_Value("erp",f"number='{number}'",f"dd='{dd}'")
-    def update_dc(self,number,tc):
-        self.update_Value("erp",f"number='{number}'",f"tc='{tc}'")
+        self.update_Value("statistics",f"number='{number}'",f"dd='{dd}'")
+    def update_rc(self,number,rc):
+        self.update_Value("statistics",f"number='{number}'",f"rc='{rc}'")
+    def update_tc(self,number,tc):
+        self.update_Value("statistics",f"number='{number}'",f"tc='{tc}'")
     def read_dc(self,number):
-        return self.read_Value("erp","dc",f"number='{number}'")
+        return self.read_Value("statistics","dc",f"number='{number}'")
     def read_pc(self,number):
-        return self.read_Value("erp","pc",f"number='{number}'")
+        return self.read_Value("statistics","pc",f"number='{number}'")
+    def read_rc(self,number):
+        return self.read_Value("statistics","rc",f"number='{number}'")
     def read_ad(self,number):
-        return self.read_Value("erp","ad",f"number='{number}'")
+        return self.read_Value("statistics","ad",f"number='{number}'")
     def read_dd(self,number):
-        return self.read_Value("erp","dd",f"number='{number}'")
+        return self.read_Value("statistics","dd",f"number='{number}'")
     def read_tc(self,number):
-        return self.read_Value("erp","tc",f"number='{number}'")
-    def delete_ERP_row(self,number):
-        self.delete_Row("erp",f"number='{number}'")
+        return self.read_Value("statistics","tc",f"number='{number}'")
+    def delete_statistics_row(self,number):
+        self.delete_Row("statistics",f"number='{number}'")
+    def calculate_Formulas(self,number,dispatch_date,arrival_date,raw_material_cost,production_time):
+        pc=production_time
+        dc=raw_material_cost*(dispatch_date-arrival_date)*0.01
+        tc=dc+pc+raw_material_cost
+        self.update_rc(number,raw_material_cost)
+        self.update_tc(number,tc)
+        self.update_dc(number,dc)
+        self.update_pc(number,pc)
+        self.update_dd(number,dispatch_date)
+        self.update_ad(number,arrival_date)
 '''
 Example code
 

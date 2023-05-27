@@ -61,9 +61,6 @@ def process_orders():
 def pass_to_next_day():
     mps.request_lock_current_day = True
     mps.run()
-    print("next day...")
-    # tcp_process.start()
-    # tcp_process.join()
 
 
 if __name__ == '__main__':
@@ -80,10 +77,11 @@ if __name__ == '__main__':
 
         mps.first_run()
         #terminal.show_new_plans(mps)
-        # mps.show_schedule()
+        mps.show_schedule()
 
+        send_message_after_x_seconds = 1
         current_time = start_time = 0
-        next_time = start_time + 2
+        next_time = start_time + send_message_after_x_seconds
         send_current_day = True
         while current_time - start_time <= day_time:
             time.sleep(1) # current time is equal to 1s
@@ -95,18 +93,15 @@ if __name__ == '__main__':
                 print(f"------------------------------------------------ day: {day_index} "
                       f"---------------------------------------")
                 start_time = current_time = 0
-                next_time = start_time + 2
-                mps.request_lock_current_day = True
-                mps.lock_current_day()
-                mps.run()
+                next_time = start_time + send_message_after_x_seconds
+                pass_to_next_day()
                 mps.show_schedule()
                 send_current_day = True
                 #mps.show_schedule()
                 #terminal.show_new_plans(mps)
-            #elif current_time >= next_time:
             elif send_current_day is True:
-                next_time = current_time + 2
-                message = mps.get_plans_list()[day_index]
+                next_time = current_time + send_message_after_x_seconds
+                message = mps.get_plans_list()[0]
                 comm_to_mes.set_msg(message)
                 send_current_day = False
             elif comm_to_mes.get_feedback_msg() == FEEDBACK_MSG:

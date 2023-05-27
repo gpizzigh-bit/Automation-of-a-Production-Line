@@ -119,6 +119,7 @@ def add_one_if_float(num):
 class Scheduler:
 
     def __init__(self):
+        self.count_execution = 0
         self.current_day = None
         self.order_dic = None
         self.order_list = []
@@ -135,7 +136,8 @@ class Scheduler:
     def run(self):
         print("Starting Scheduler", end='')
         if self.request_lock_current_day:
-
+            self.count_execution += 1
+            # run the algorithm without considering the first day
             self.nested_result_list = []
             self.order_list = []
             # TODO don't connect to the database inside the mps this is slowing down execution
@@ -204,7 +206,6 @@ class Scheduler:
 
     def _parse_data(self):
         # get the pending orders form the database
-        # db = Database()
         pending_orders_obj = Orders()
         pending_orders = pending_orders_obj.read_All_Orders()
         for order in pending_orders[1:]:
@@ -382,13 +383,15 @@ class Scheduler:
         # copy the current day on a self list
         self.current_day = self.nested_result_list[0].copy()
         # self.nested_result_list.pop(0)
-        del self.nested_result_list[0]
+        for _ in range(0, self.count_execution):
+            del self.nested_result_list[0]
+        print("deleted current day")
         # for i in range(len(self.nested_result_list)):
         #     self.nested_result_list[i+1] = self.nested_result_list[i+1][:]
 
     def show_schedule(self):
         day = 0
-        for each_list in self.nested_result_list:
+        for each_list in self.nested_result_list[:4]:
             print(f"day:{day} \n {each_list}")
             day += 1
 

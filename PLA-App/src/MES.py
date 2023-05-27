@@ -380,8 +380,6 @@ def check_if_possible(i, j, tools_finais):
             return 1
 
     return 0
-
-
 def alocacao_pecas(tools_iniciais, tools_finais):
     i = 0
     j = 0
@@ -446,8 +444,6 @@ def alocacao_pecas(tools_iniciais, tools_finais):
         print(f"Machine {i + 1}: tool {resultado[0][i]} , is going to make a piece with the id={resultado[1][i]}")
 
     return resultado
-
-
 def count1(tools_iniciais, tools_finais, resultado):
     j = 0
     i = 0
@@ -466,8 +462,6 @@ def count1(tools_iniciais, tools_finais, resultado):
             i = 4
         else:
             i = i + 1
-
-
 def count2(tools_iniciais, tools_finais, resultado):
     j = [[0, 0], [0, 0]]
     i = 0
@@ -529,10 +523,18 @@ def count2(tools_iniciais, tools_finais, resultado):
 
 
 def is_new(old_list, new_list):
+    # if not old_list and not new_list:
+    #     # check if they are empty
+    #     return True
+    # if len(old_list) == 1 or len(new_list) == 1:
+    #     # check if there is only one value
+    #     return True
     if old_list is None and new_list is not None:
+        # check if they are not None
         return True
     elif new_list is None:
         return False
+    # check if they are different
     for new_msg in new_list:
         if new_msg not in old_list:
             return True
@@ -611,11 +613,15 @@ if __name__ == '__main__':
     # switch_case(string, maquina_a_usar, id, client)
     # erp_comm_t.start()
     old_msg = comm_to_erp.get_message()
+
+    message_received = False
     while True:
-        # always wait for a change on the message coming form the ERP and react
-        # client.disconnect()
-        time.sleep(1)
-        if is_new(old_msg, comm_to_erp.get_message()) and comm_to_erp.get_message() is not None:
-            print(f"Got a new message from the ERP {comm_to_erp.get_message()}")
-            print()
-            old_msg = comm_to_erp.get_message()
+        message = comm_to_erp.get_message()
+        if message is not None:
+            if not message_received:
+                message_received = True
+                print(f"Got a new message from the ERP {message}")
+                print()
+                # TODO Diogo seu codigo vai aqui usa a variavle message pra pegar o pedido do ERP
+        else:
+            message_received = False

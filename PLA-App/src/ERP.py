@@ -12,6 +12,8 @@ from modules import udp_comm_class, terminal_class
 
 install(show_locals=True)
 
+# TODO show the chosen supllier on the terminal
+
 # Constants
 UDP_IP = "127.0.0.1"  # local
 UDP_PORT = 54321
@@ -22,7 +24,7 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 
-day_time = 60
+day_time = 5
 
 mps = MPS.Scheduler()
 
@@ -44,7 +46,7 @@ class ThreadedClient(threading.Thread):
     def set_msg(self, msg):
         self.msg = msg
 
-    def get_feedback_mgs(self):
+    def get_feedback_msg(self):
         return self.feedback_msg
 
     def stop(self):
@@ -77,38 +79,38 @@ if __name__ == '__main__':
         # terminal.run()
 
         mps.first_run()
-        terminal.show_new_plans(mps)
+        #terminal.show_new_plans(mps)
         # mps.show_schedule()
 
-        current_time = start_time = time.monotonic()
+        current_time = start_time = 0
         next_time = start_time + 2
+        send_current_day = True
         while current_time - start_time <= day_time:
-            current_time = time.monotonic()
-            # print(current_time - start_time)
+            time.sleep(1) # current time is equal to 1s
+            current_time += 1
             if current_time - start_time >= day_time:
-                # day is over reset start time
                 day_index += 1
-                if day_index >= len(erp_to_mes_test_data):
+                if day_index >= len(mps.get_plans_list()):
                     sys.exit(1)
-                print(
-                    f"------------------------------------------------ day: {day_index} "
-                    f"---------------------------------------")
-                # mps.show_schedule()
-                start_time = current_time
+                print(f"------------------------------------------------ day: {day_index} "
+                      f"---------------------------------------")
+                start_time = current_time = 0
                 next_time = start_time + 2
-                # lock the current day on the mps and re-run the algorithm
                 mps.request_lock_current_day = True
                 mps.lock_current_day()
                 mps.run()
-                #
-            elif current_time >= next_time:
-                next_time += 2
-                # current day is running...
-                # after 2 seconds
-                # send today orders to the ERP and wait a feedback
-
-                comm_to_mes.set_msg(erp_to_mes_test_data[day_index])
-            continue
+                mps.show_schedule()
+                send_current_day = True
+                #mps.show_schedule()
+                #terminal.show_new_plans(mps)
+            #elif current_time >= next_time:
+            elif send_current_day is True:
+                next_time = current_time + 2
+                message = mps.get_plans_list()[day_index]
+                comm_to_mes.set_msg(message)
+                send_current_day = False
+            elif comm_to_mes.get_feedback_msg() == FEEDBACK_MSG:
+                comm_to_mes.set_msg(None)
 
         p.kill()
         sys.exit(1)

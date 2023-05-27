@@ -21,7 +21,7 @@ class TCPClient:
         self.socket.send(data)
 
     def receive(self, buffer_size):
-        return self.socket.recv(buffer_size)
+        return pickle.loads(self.socket.recv(buffer_size))
 
     def close(self):
         self.socket.close()

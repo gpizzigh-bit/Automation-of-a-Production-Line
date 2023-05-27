@@ -36,9 +36,9 @@ class ThreadedServer(threading.Thread):
     def stop(self):
         self.signal_to_stop = True
 
-def machine_decision(type, machines_state):
+def machine_decision(type, machines_state, M2exception):
     machines = [
-        [1, 2, 3],
+        [1, 2, 3], #
         [1, 3, 4],
         [2, 3, 4],
         [1, 3, 4]]

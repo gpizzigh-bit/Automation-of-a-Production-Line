@@ -1,4 +1,7 @@
 ## Uso obrigatório
+
+### Percursos
+
 <table>
     <tr>
         <th>Node</th>
@@ -29,6 +32,15 @@
         <th>Ativa percurso do Warehouse para maquina 4; Ligar variavel e ela desativa automáticamente (Booleano)</th>
     </tr>
     <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2</th>
+        <th>Ativa percurso da máquina 1 para maquina 2; Ligar variavel e ela desativa automáticamente (Booleano)</th>
+    </tr>
+</table>
+
+### Tempos percursos
+
+<table>
+    <tr>
         <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1.Dif_Time</th>
         <th>Tempo do percurso do Warehouse para maquina 1 (sem considerar tempo de execução da máquina)(int)</th>
     </tr>
@@ -41,13 +53,13 @@
         <th>Tempo do percurso do Warehouse para maquina 4 (sem considerar tempo de execução da máquina)(int)</th>
     </tr>
     <tr>
-        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2</th>
-        <th>Ativa percurso da máquina 1 para maquina 2; Ligar variavel e ela desativa automáticamente (Booleano)</th>
-    </tr>
-    <tr>
         <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.Dif_Time</th>
         <th>Tempo do percurso da máquina 1 para maquina 2 (sem considerar tempo de execução da máquina)(int)</th>
     </tr>
+</table>
+
+### Máquinas
+<table>
     <tr>
         <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop</th>
         <th>Tempo que a máquina 1 vai permanecer em funcionamento (em segundos)(configurar antes de enviar peça pra máquina)(int)</th>
@@ -63,6 +75,43 @@
     <tr>
         <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop</th>
         <th>Tempo que a máquina 4 vai permanecer em funcionamento (em segundos)(configurar antes de enviar peça pra máquina)(int)</th>
+    </tr>
+</table>
+
+### Restock
+
+<table>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start</th>
+        <th>Inicia restock peças P1 (É necessario desativar no fim)(Booleano)</th>
+    </tr>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start</th>
+        <th>Inicia restock peças P2 (É necessario desativar no fim)(Booleano)</th>
+    </tr>
+</table>
+
+### Shipping
+
+As variáveis WH_SH_2.Start e WH_SH_3.Start devem ser ativadas e desativadas em alternância de 
+forma a enviar as peças para cima e para baixo alterando o percurso
+
+<table>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Piece_Type</th>
+        <th>Tipo de peças a dar shipping (Configuarar antes de enviar) (Booleano)</th>
+    </tr>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp</th>
+        <th>Número de peças a dar shipping (Configuarar antes de enviar) (Booleano)</th>
+    </tr>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_2.Start</th>
+        <th>Inicia shipping para a area de baixo (Booleano)</th>
+    </tr>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_3.Start</th>
+        <th>Inicia shipping para a area de cima (Booleano)</th>
     </tr>
 </table>
 

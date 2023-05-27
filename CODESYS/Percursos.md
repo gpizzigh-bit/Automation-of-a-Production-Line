@@ -115,6 +115,15 @@ forma a enviar as peças para cima e para baixo alterando o percurso
     </tr>
 </table>
 
+### Contagem Peças
+
+<table>
+    <tr>
+        <th>ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.TWH_in.WH_Piece_Number</th>
+        <th>Numero de peças em armazem (int)</th>
+    </tr>
+</table>
+
 ## Opcional
 O codesys retirar as peças das máquinas automáticamente no fim do processsamento. Podes usar estas variaveis para teste
 <table>

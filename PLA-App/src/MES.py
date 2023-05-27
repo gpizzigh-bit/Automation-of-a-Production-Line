@@ -1,17 +1,15 @@
 # [TODO] Communicate to the Database
 # [TODO] Lost Communication retrive "Last state" from the database
 # [TODO] Execute Orders
+# [TODO] Choose the machine
 
 import threading
 import time
-
 import pyfiglet
 from opcua import ua
 from termcolor import colored
-
+from modules.database_orders_class import Database, Stock
 from modules import tcp_comm
-
-done = 0
 
 TCP_IP = "127.0.0.1"  # local
 TCP_PORT = 12345
@@ -49,6 +47,29 @@ requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
 # TODO toda vez que aparece um status de "makeANDdeliver" vc tem que checar no armazem antes de enviar
 # se existem outras peças com o mesmo workpiece e o status store2deliver
 # store2make sao peças usadas para fazer outras. nao devem ser enviadas com o make and deliver, mm  q sejam do mm tipo
+
+
+def machine_decision(type):
+    machines = [
+        [1, 2, 3],
+        [1, 3, 4],
+        [2, 3, 4],
+        [1, 3, 4]]
+    tool =[0,0,0,0]
+    pecas_tools = [2, 3, 4, 1, 4, 3, 3]
+    # P3,P4,P5,P6,P7,P8,P9
+
+def update_database_P1_P2(increment, type):
+    db=Database()
+    stock=Stock()
+    if type==1:
+        current=stock.read_Stock_P1()
+        new=increment+current
+    elif type==2:
+        current=stock.read_Stock_P2()
+        new=increment+current
+
+    db.close()
 
 def switch_case(x, machine_number, todo, c, a):
     c = c
@@ -521,7 +542,6 @@ def count2(tools_iniciais, tools_finais, resultado):
                 k = k + 1
         print(j)"""
 
-
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
     #     # check if they are empty
@@ -591,8 +611,11 @@ if __name__ == '__main__':
             show_terminal(requests, id, 0, 0)
             string=requests[id]['workpiece']
             todo=requests[id]['status']
-            #definir maquina a utilizar, excepto se for restock
-            switch_case(string, maquina_a_usar, todo, c, a)
+            if todo!=0:
+                maquina=machine_decision(string)
+            else:
+                maquina=0
+            switch_case(string, maquina, todo, c, a)
             b = time.time()
             b=b-a
             show_terminal_end(requests, b)"""

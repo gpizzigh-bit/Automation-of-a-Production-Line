@@ -15,8 +15,8 @@ STORE2DELIVER = "store2deliver"
 STORE2DELIVER_WAREHOUSE_LIMIT = 17  # 17
 LIMIT_OF_DELIVER_BY_DAY = 5
 RESTOCK_THRESHOLD = {"P1": 10, "P2": 20}
-P1_RESTOCK_LIMIT_BY_DAY = 2  # pieces
-P2_RESTOCK_LIMIT_BY_DAY = 5  # pieces
+P1_RESTOCK_LIMIT_BY_DAY = 9  # pieces
+P2_RESTOCK_LIMIT_BY_DAY = 11  # pieces
 
 from constants.local_constants import suppliers
 
@@ -104,7 +104,7 @@ def find_supplier(piece_type: str, quantity: int, delivery_time: int):
 
 
 def restock_shift_list(nested_list, index, quantity, day_objective):
-    for i in range(quantity):
+    for i in range(add_one_if_float(quantity)):
         nested_list.insert(index + i, [day_objective])
     return nested_list
 
@@ -113,7 +113,17 @@ def add_one_if_float(num):
     if isinstance(num, float) and num != int(num):
         return int(num + 1)
     else:
-        return num
+        return int(num)
+
+
+def count_empty_days(nested_list):
+    count = 0
+    for inner_list in nested_list:
+        if not inner_list:
+            count += 1
+        else:
+            break
+    return count
 
 
 class Scheduler:
@@ -134,73 +144,43 @@ class Scheduler:
         self.p2_supplier = None
 
     def run(self):
-        print("Starting Scheduler", end='')
         if self.request_lock_current_day:
             self.count_execution += 1
             # run the algorithm without considering the first day
             self.nested_result_list = []
             self.order_list = []
-            # TODO don't connect to the database inside the mps this is slowing down execution
             self._parse_data()
-            print(".", end='')
             self.find_last_deadline()
-            print(".", end='')
             self.find_total_time()
-            print(".", end='')
             self.total_p1_piece_count = 0
             self.total_p2_piece_count = 0
-
             for order_number in range(0, len(self.order_list)):
                 if order_number != 0:
-                    print(".", end='')
                     self.schedule_order(order_number)
-
             self.resolve_all_conflicts()
-            print(".", end='')
-
             if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
                 # Request a day to only deliver stored ready pieces
                 self.request_delivery_day()
-                print(".", end='')
-
             self.check_warehouse_status()
-            print(".", end='')
-
             self.lock_current_day()
-            print(".", end='')
             self.request_lock_current_day = False
-            print("Done")
 
             return self.nested_result_list
 
     def first_run(self):
-        print("Starting Scheduler", end='')
         self.nested_result_list = []
         self.order_list = []
-        # TODO don't connect to the database inside the mps this is slowing down execution
         self._parse_data()
-        print(".", end='')
         self.find_last_deadline()
-        print(".", end='')
         self.find_total_time()
-        print(".", end='')
-
         for order_number in range(0, len(self.order_list)):
             # for order_number in range(0, 3):
-            print(".", end='')
             self.schedule_order(order_number)
-
         self.resolve_all_conflicts()
-        print(".", end='')
-
         if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
             # Request a day to only deliver stored ready pieces
-            print(".", end='')
             self.request_delivery_day()
-
         self.check_warehouse_status()
-        print(".", end='')
-        print("Done")
 
         return self.nested_result_list
 
@@ -348,12 +328,26 @@ class Scheduler:
         warehouse = Stock()
         amount_of_p1 = warehouse.read_Stock_P1()
         amount_of_p2 = warehouse.read_Stock_P2()
+
+        if amount_of_p1 == 0 and amount_of_p2 == 0:
+            # Fresh factory status
+            # count available days before firsts order
+            needed_days = count_empty_days(self.nested_result_list)
+            self.p1_supplier = find_supplier("P1", (RESTOCK_THRESHOLD["P1"] - amount_of_p1), needed_days)
+            self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"] - amount_of_p2), needed_days)
+
+            for index in range(0, needed_days-1):
+                self.nested_result_list[index] = request_piece("P1 and P2 restock", '')
+
+            # restock_shift_list(self.nested_result_list, 0, needed_days,
+            #                    request_piece("P1 and P2 restock", ''))
+
         # compare to the total requested by the pending orders
-        if amount_of_p1 <= RESTOCK_THRESHOLD["P1"] and amount_of_p2 <= RESTOCK_THRESHOLD["P2"]:
+        if amount_of_p1 < RESTOCK_THRESHOLD["P1"] and amount_of_p2 < RESTOCK_THRESHOLD["P2"]:
             # if bellow limit of the threshold request a restocking day
             # calculate number of days to restock
-            needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY + (
-                    RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
+            needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY + \
+                          (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
 
             needed_days = add_one_if_float(needed_days)  # add one day of not int
             # find a supplier for the difference of the needed pieces to reach the threshold
@@ -362,9 +356,10 @@ class Scheduler:
 
             desired_index_day = needed_days * max(suppliers[self.p1_supplier]['P1']['delivery_time'],
                                                   suppliers[self.p2_supplier]['P1']['delivery_time'])
-            restock_shift_list(self.nested_result_list, desired_index_day, needed_days, request_piece("P1 and P2 restock", ''))
+            restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+                               request_piece("P1 and P2 restock", ''))
 
-        elif amount_of_p1 <= RESTOCK_THRESHOLD["P1"]:
+        elif amount_of_p1 < RESTOCK_THRESHOLD["P1"]:
             needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY
             needed_days = add_one_if_float(needed_days)  # add one day of not int
             self.p1_supplier = find_supplier("P1", RESTOCK_THRESHOLD["P1"] - amount_of_p1, needed_days)
@@ -372,11 +367,11 @@ class Scheduler:
             restock_shift_list(self.nested_result_list, desired_index_day, needed_days, request_piece("P1 restock", ''))
 
         # now for piece p2
-        elif amount_of_p2 <= RESTOCK_THRESHOLD["P2"]:
+        elif amount_of_p2 < RESTOCK_THRESHOLD["P2"]:
             needed_days = (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
             needed_days = add_one_if_float(needed_days)  # add one day of not int
             self.p2_supplier = find_supplier("P2", RESTOCK_THRESHOLD["P2"] - amount_of_p2, needed_days)
-            desired_index_day = needed_days * suppliers[self.p2_supplier]['P1']['delivery_time']
+            desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
             restock_shift_list(self.nested_result_list, desired_index_day, needed_days, request_piece("P2 restock", ''))
 
     def lock_current_day(self):
@@ -385,13 +380,12 @@ class Scheduler:
         # self.nested_result_list.pop(0)
         for _ in range(0, self.count_execution):
             del self.nested_result_list[0]
-        print("deleted current day")
         # for i in range(len(self.nested_result_list)):
         #     self.nested_result_list[i+1] = self.nested_result_list[i+1][:]
 
     def show_schedule(self):
         day = 0
-        for each_list in self.nested_result_list[:4]:
+        for each_list in self.nested_result_list[:10]:
             print(f"day:{day} \n {each_list}")
             day += 1
 

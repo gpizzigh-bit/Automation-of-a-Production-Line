@@ -17,7 +17,6 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_MES = "HANDSHAKE FROM MES"
 
-
 class ThreadedServer(threading.Thread):
     def __init__(self):
         # create the server object for communication
@@ -37,27 +36,17 @@ class ThreadedServer(threading.Thread):
     def stop(self):
         self.signal_to_stop = True
 
-
-requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P6', 'status': 'makeANDdeliver'}]
-
-
-# TODO toda vez que aparece um status de "makeANDdeliver" vc tem que checar no armazem antes de enviar
-# se existem outras peças com o mesmo workpiece e o status store2deliver
-# store2make sao peças usadas para fazer outras. nao devem ser enviadas com o make and deliver, mm  q sejam do mm tipo
-
-
-def machine_decision(type):
+def machine_decision(type, machines_state):
     machines = [
         [1, 2, 3],
         [1, 3, 4],
         [2, 3, 4],
         [1, 3, 4]]
-    tool =[0,0,0,0]
     pecas_tools = [2, 3, 4, 1, 4, 3, 3]
-    # P3,P4,P5,P6,P7,P8,P9
+    # tool needed :P3,P4,P5,P6,P7,P8,P9
+
+    number = int(type[1:])
+    machine_needed=pecas_tools[number-3]
 
 def update_database_P1_P2(increment, type):
     db=Database()
@@ -333,12 +322,6 @@ def show_terminal_end(requests, time):
     print('-----------------------------------------------------------------------')
 
 
-"""
-interface:
-The status includes the number of pieces already produced, the number of pending pieces, the total production time of the order, etc. 
-The user interface should also provide enough information for the user to determine the status of that algorithm.
-"""
-
 
 def show_terminal_shipping(requests, time, p, n):
     print('-----------------------------------------------------------------------')
@@ -587,6 +570,7 @@ if __name__ == '__main__':
     client = Client(url)
     client.connect()
     c=[0,0,0,0,0,0,0]
+    machine_state=[1,1,2,1]
 =======
     #client = Client(url)
     #client.connect()
@@ -594,12 +578,6 @@ if __name__ == '__main__':
     size=len(requests)
     id=0
 
-    """
-    # for id in range(size):
-    #     string = requests[id]['workpiece']
-    #     todo = requests[id]['status']
-    #     switch_case(string, 1, id, client, todo)
-    """
     while True:
         #receive and store requests from the erp
         size=len(requests)
@@ -645,6 +623,6 @@ if __name__ == '__main__':
                 message_received = True
                 print(f"Got a new message from the ERP {message}")
                 print()
-                # TODO Diogo seu codigo vai aqui usa a variavle message pra pegar o pedido do ERP
+                requests=message
         else:
             message_received = False

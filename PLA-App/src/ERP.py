@@ -65,20 +65,49 @@ def pass_to_next_day():
     mps.request_lock_current_day = True
     mps.run()
 
+
 def calculate_cost_for_each_order(order):
+    # stat_obj = database_orders_class.Statistics()
+    # order_dic = dict(subString.split(":") for subString in order.split(";"))
+    # order_number = order_dic[' number']
+    # # TODO test function Delete after
+    # Ad = 3  # <- MPS
+    # Dd = 10  # <- MES
+    # stat_obj.update_ad(order_number, Ad)
+    # stat_obj.update_dc(order_number, )
+    #print(order[' quantity'] * stat_obj.read_tc(order_dic[' number']))
+    pass
+
+
+def find_make_and_deliver(nested_list, target_workpiece):
+    day_index = -1
+    total_order_pieces = 0
+    for i, inner_list in enumerate(nested_list):
+        for d in inner_list:
+            if d['status'] == 'store2deliver' and d['workpiece'] == target_workpiece:
+                total_order_pieces += 1
+            elif d['status'] == 'makeANDdeliver' and d['workpiece'] == target_workpiece:
+                if day_index == -1:
+                    day_index = i
+                    for each_d in nested_list[day_index]:
+                        if each_d['status'] == 'makeANDdeliver' and each_d['workpiece'] == target_workpiece:
+                            total_order_pieces += 1
+                    return day_index, total_order_pieces
+    return day_index, total_order_pieces
+
+
+def find_the_dispatch_day_of_each_order(nested_list):
+    orders_obj = udp_comm_class.Orders()
     stat_obj = database_orders_class.Statistics()
-    order_dic = dict(subString.split(":") for subString in order.split(";"))
-    order_number = order_dic[' number']
-    # TODO test function Delete after
-    Ad = 3 # <- MPS
-    Dd = 10 # <- MES
-    stat_obj.update_ad(order_number, Ad)
-    stat_obj.update_dc(order_number, )
-    print(order[' quantity']*stat_obj.read_tc(order_dic[' number']))
-
-
-
-
+    pending_orders = orders_obj.read_All_Orders()
+    for order in pending_orders:
+        order_dic = dict(subString.split(":") for subString in order.split(";"))
+        # Gets the desired day to deliver the pieces of the order
+        order_day_index, total_order_pieces = find_make_and_deliver(nested_list, order_dic[' workpiece'])
+        print(f"{total_order_pieces} == {order_dic[' quantity']}")
+        if total_order_pieces == order_dic[' quantity']:  # order found
+            # send the dispatch day to the database
+            stat_obj.update_dd(order_dic['number'], order_day_index)
 
 
 def show_interface(day_index):
@@ -99,12 +128,18 @@ def show_interface(day_index):
     orders = concluded_orders_obj.read_All_Concluded()
     for order in orders[:days_ahead]:
         print(order)
-        #calculate_cost_for_each_order(order)
+        # calculate_cost_for_each_order(order)
     print()
 
     print(f"///////////// Purchasing Plan /////////////")
     mps.show_day_ahead_purchasing_schedule(day_index, days_ahead)
     print()
+
+    print(f"///////////// Factory Statistics /////////////")
+    stats = database_orders_class.Statistics()
+    for order in pending_orders[:days_ahead]:
+        order_dic = dict(subString.split(":") for subString in order.split(";"))
+        print(f"order number: {order_dic['number']} Total cost: {stats.read_tc(order_dic['number'])}")
 
     print(f"///////////// MPS {days_ahead}-days ahead /////////////")
     mps.show_day_ahead_schedule(day_index, days_ahead)
@@ -119,7 +154,6 @@ def simulate_day_cycle():
     day_index = 0
     mps.first_run()
     terminal.show_new_plans(mps)
-    # print(f"Plan list: {mps.get_plans_list()}")
     # mps.show_schedule()
     send_message_after_x_seconds = 1
     current_time = start_time = 0

@@ -236,6 +236,8 @@ class Orders(Database):
         Latest = self.get_Max("Orders", "duedate")
         return Latest
 
+    def read_Workpiece(self,number):
+       self.read_Value(self, "orders", "piecetype", f"number='{number}'")
 
 class Clients(Database):
 

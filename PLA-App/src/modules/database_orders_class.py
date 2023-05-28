@@ -21,8 +21,6 @@ class Database():
         # Basic Modules to be used in subclasses
 
     def create_Table(self, table_name, columns):
-        # Create table with given parameters
-
         query = f"CREATE TABLE if not exists {table_name} ({columns});"
         self.cur.execute(query)
         self.conn.commit()
@@ -35,28 +33,20 @@ class Database():
         return result[0] > 0
 
     def delete_Table(self, table_name):
-        # Delete table with given parameters
-
         query = f"DROP TABLE {table_name} CASCADE;"
         self.cur.execute(query)
         self.conn.commit()
 
     def close(self):
-        # Close the connection to the database
-
         self.cur.close()
         self.conn.close()
 
     def insert_Row(self, table_name, values):
-        # Insert a new row into a table
-
         query = f"INSERT INTO {table_name} VALUES ({values});"
         self.cur.execute(query)
         self.conn.commit()
 
     def delete_Row(self, table_name, condition):
-        # Delete a row from table
-
         query = f"DELETE FROM {table_name} WHERE {condition};"
         self.cur.execute(query)
         self.conn.commit()
@@ -67,24 +57,18 @@ class Database():
         self.conn.commit()
 
     def read_Values(self, table_name, variables, condition):
-        # Fecth all values from a given condition
-
         query = f"SELECT {variables} FROM {table_name} WHERE {condition};"
         self.cur.execute(query)
         self.conn.commit()
         return self.cur.fetchall()
 
     def read_Table(self, table_name):
-        # Fetch all values from a table
-
         query = f"SELECT * FROM {table_name};"
         self.cur.execute(query)
         self.conn.commit()
         return self.cur.fetchall()
 
     def get_Max(self, table_name, column):
-        # Get the max value from a column
-
         query = f"SELECT MAX({column}) from {table_name}"
         self.cur.execute(query)
         result = self.cur.fetchone()[0]
@@ -101,9 +85,7 @@ class Database():
 class Concluded(Database):
 
     # # Concluded orders table subclass
-    # Add_Order adds an order number to the concluded orders table
-    # Delete_Order deletes an order by its number
-    # Read All_Orders returns an array of strings, each string corresponds to an order and contains all its values: number,piecetype,date,etc
+
     def check_Concluded(self, order):
         return self.check_Amount("concluded", f"number='{order}'")
 
@@ -168,13 +150,6 @@ class Concluded(Database):
 class Orders(Database):
 
     # Orders table subclass
-    # Note: each order number is unique
-    # add_Order adds an order to the orders table
-    # Note: number,quantity and client id are int type, the other variables are character varying(255)
-    # delete_Order deletes and ordery by its number
-    # read_All_Orders returns an array of strings, each string contains an order
-    # read_Order_Number_X returns an array with the order with the number X.
-    # read_X_Orders returns an array with X number of orders 
 
     def check_Order(self, order):
         return self.check_Amount("orders", f"number='{order}'")
@@ -254,6 +229,9 @@ class Clients(Database):
 
 
 class Days(Database):
+
+    # Days table subclass
+
     def Insert_Day(self, Day, Order1, Order2, Order3, Order4):
         self.insert_Row("Days", f"{Day},'{Order1}','{Order2}','{Order3}','{Order4}'")
 
@@ -299,6 +277,9 @@ class Days(Database):
 
 
 class PieceTime(Database):
+
+    # Piecetime table subclass
+
     def add_Piece(self, piecetype, time):
         self.insert_Row("piecetime", f"{piecetype},'{time}'")
 
@@ -339,6 +320,9 @@ class Stock(Database):
 
 
 class Statistics(Database):
+
+    #Statistics Table subclass
+
     def add_statistics_Row(self, number, dc, pc, ad, dd, tc, rc):
         self.insert_Row("statistics", f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
 

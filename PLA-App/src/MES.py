@@ -1,24 +1,21 @@
 # [TODO] Communicate to the Database
 # [TODO] Lost Communication retrive "Last state" from the database
 # [TODO] Execute Orders
+# [TODO] Choose the machine
 
 import threading
 import time
-
 import pyfiglet
 from opcua import ua
 from termcolor import colored
-
+from modules.database_orders_class import Database, Stock
 from modules import tcp_comm
-
-done = 0
 
 TCP_IP = "127.0.0.1"  # local
 TCP_PORT = 12345
 
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_MES = "HANDSHAKE FROM MES"
-
 
 class ThreadedServer(threading.Thread):
     def __init__(self):
@@ -39,16 +36,29 @@ class ThreadedServer(threading.Thread):
     def stop(self):
         self.signal_to_stop = True
 
+def machine_decision(type, machines_state):
+    machines = [
+        [1, 2, 3],
+        [1, 3, 4],
+        [2, 3, 4],
+        [1, 3, 4]]
+    pecas_tools = [2, 3, 4, 1, 4, 3, 3]
+    # tool needed :P3,P4,P5,P6,P7,P8,P9
 
-requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P7', 'status': 'store2deliver'},
-            {'workpiece': 'P6', 'status': 'makeANDdeliver'}]
+    number = int(type[1:])
+    machine_needed=pecas_tools[number-3]
 
+def update_database_P1_P2(increment, type):
+    db=Database()
+    stock=Stock()
+    if type==1:
+        current=stock.read_Stock_P1()
+        new=increment+current
+    elif type==2:
+        current=stock.read_Stock_P2()
+        new=increment+current
 
-# TODO toda vez que aparece um status de "makeANDdeliver" vc tem que checar no armazem antes de enviar
-# se existem outras peças com o mesmo workpiece e o status store2deliver
-# store2make sao peças usadas para fazer outras. nao devem ser enviadas com o make and deliver, mm  q sejam do mm tipo
+    db.close()
 
 def switch_case(x, machine_number, todo, c, a):
     c = c
@@ -312,12 +322,6 @@ def show_terminal_end(requests, time):
     print('-----------------------------------------------------------------------')
 
 
-"""
-interface:
-The status includes the number of pieces already produced, the number of pending pieces, the total production time of the order, etc. 
-The user interface should also provide enough information for the user to determine the status of that algorithm.
-"""
-
 
 def show_terminal_shipping(requests, time, p, n):
     print('-----------------------------------------------------------------------')
@@ -521,7 +525,6 @@ def count2(tools_iniciais, tools_finais, resultado):
                 k = k + 1
         print(j)"""
 
-
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
     #     # check if they are empty
@@ -567,6 +570,7 @@ if __name__ == '__main__':
     client = Client(url)
     client.connect()
     c=[0,0,0,0,0,0,0]
+    machine_state=[1,1,2,1]
 =======
     #client = Client(url)
     #client.connect()
@@ -574,12 +578,6 @@ if __name__ == '__main__':
     size=len(requests)
     id=0
 
-    """
-    # for id in range(size):
-    #     string = requests[id]['workpiece']
-    #     todo = requests[id]['status']
-    #     switch_case(string, 1, id, client, todo)
-    """
     while True:
         #receive and store requests from the erp
         size=len(requests)
@@ -591,8 +589,11 @@ if __name__ == '__main__':
             show_terminal(requests, id, 0, 0)
             string=requests[id]['workpiece']
             todo=requests[id]['status']
-            #definir maquina a utilizar, excepto se for restock
-            switch_case(string, maquina_a_usar, todo, c, a)
+            if todo!=0:
+                maquina=machine_decision(string)
+            else:
+                maquina=0
+            switch_case(string, maquina, todo, c, a)
             b = time.time()
             b=b-a
             show_terminal_end(requests, b)"""
@@ -622,6 +623,6 @@ if __name__ == '__main__':
                 message_received = True
                 print(f"Got a new message from the ERP {message}")
                 print()
-                # TODO Diogo seu codigo vai aqui usa a variavle message pra pegar o pedido do ERP
+                requests=message
         else:
             message_received = False

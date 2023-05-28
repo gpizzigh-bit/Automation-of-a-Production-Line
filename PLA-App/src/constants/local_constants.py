@@ -13,6 +13,18 @@ suppliers = {
     }
 }
 
+STORE_GLOBAL = "makeANDstore"
+DELIVER_GLOBAL = "makeANDdeliver"
+STORE2DELIVER = "store2deliver"
+STORE2DELIVER_WAREHOUSE_LIMIT = 17  # 17
+P1_RESTOCK_STR = "P1 restock"
+P2_RESTOCK_STR = "P2 restock"
+P1_AND_P2_RESTOCK_STR = "P1 and P2 restock"
+LIMIT_OF_DELIVER_BY_DAY = 5
+RESTOCK_THRESHOLD = {"P1": 10, "P2": 20}
+P1_RESTOCK_LIMIT_BY_DAY = 9  # pieces
+P2_RESTOCK_LIMIT_BY_DAY = 11  # pieces
+
 erp_to_mes_test_data = [['P1 and P2 restock'],
 
                         [{'workpiece': 'P4', 'status': 'makeANDstore'},

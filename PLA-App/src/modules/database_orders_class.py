@@ -297,71 +297,119 @@ class Days(Database):
 
 
 class PieceTime(Database):
-    def add_Piece(self,piecetype,time):
-         self.insert_Row("piecetime",f"{piecetype},'{time}'")
-    def delete_Piece(self,piecetype):
-        self.delete_Row("piecetime",f"piecetype='{piecetype}'")
-    def Update_Time(self,piecetype,time):
-        self.update_Value("piecetime",f"piecetype='{piecetype}'",f"time={time}")
-    def read_PieceTime(self,piecetype):
-        self.read_Value("piecetype","time",f"piecetype='{piecetype}'")
+    def add_Piece(self, piecetype, time):
+        self.insert_Row("piecetime", f"{piecetype},'{time}'")
+
+    def delete_Piece(self, piecetype):
+        self.delete_Row("piecetime", f"piecetype='{piecetype}'")
+
+    def Update_Time(self, piecetype, time):
+        self.update_Value("piecetime", f"piecetype='{piecetype}'", f"time={time}")
+
+    def read_PieceTime(self, piecetype):
+        self.read_Value("piecetype", "time", f"piecetype='{piecetype}'")
+
+
 class Stock(Database):
 
-    #Stock table subclass
+    # Stock table subclass
 
-    def add_Piece_Type(self,type,quantity):
-        self.insert_Row("stock",f"'{type}',{quantity}")
-    def delete_Piece_Type(self,type):
-        self.delete_Row("stock",f"piece='{type}'")
-    def update_Stock(self,type,new_quantity):
-        self.update_Value("stock",f"piece='{type}'",f"quantity={new_quantity}")
-    def update_Stock_P1(self,P1):
-        self.update_Stock("P1",P1)
-    def update_Stock_P2(self,P2):
-        self.update_Stock("P2",P2)
+    def add_Piece_Type(self, type, quantity):
+        self.insert_Row("stock", f"'{type}',{quantity}")
+
+    def delete_Piece_Type(self, type):
+        self.delete_Row("stock", f"piece='{type}'")
+
+    def update_Stock(self, type, new_quantity):
+        self.update_Value("stock", f"piece='{type}'", f"quantity={new_quantity}")
+
+    def update_Stock_P1(self, P1):
+        self.update_Stock("P1", P1)
+
+    def update_Stock_P2(self, P2):
+        self.update_Stock("P2", P2)
+
     def read_Stock_P1(self):
-        return self.read_Value("stock","quantity","piece='P1'")
+        return self.read_Value("stock", "quantity", "piece='P1'")
+
     def read_Stock_P2(self):
-        return self.read_Value("stock","quantity","piece='P2'")  
-class statistics(Database):
-    def add_statistics_Row(self,number,dc,pc,ad,dd,tc,rc):
-        self.insert_Row("statistics",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
-    def update_dc(self,number,dc):
-        self.update_Value("statistics",f"number='{number}'",f"dc='{dc}'")
-    def update_pc(self,number,pc):
-        self.update_Value("statistics",f"number='{number}'",f"pc='{pc}'")
-    def update_ad(self,number,ad):
-        self.update_Value("statistics",f"number='{number}'",f"dc='{ad}'")
-    def update_dd(self,number,dd):
-        self.update_Value("statistics",f"number='{number}'",f"dd='{dd}'")
-    def update_rc(self,number,rc):
-        self.update_Value("statistics",f"number='{number}'",f"rc='{rc}'")
-    def update_tc(self,number,tc):
-        self.update_Value("statistics",f"number='{number}'",f"tc='{tc}'")
-    def read_dc(self,number):
-        return self.read_Value("statistics","dc",f"number='{number}'")
-    def read_pc(self,number):
-        return self.read_Value("statistics","pc",f"number='{number}'")
-    def read_rc(self,number):
-        return self.read_Value("statistics","rc",f"number='{number}'")
-    def read_ad(self,number):
-        return self.read_Value("statistics","ad",f"number='{number}'")
-    def read_dd(self,number):
-        return self.read_Value("statistics","dd",f"number='{number}'")
-    def read_tc(self,number):
-        return self.read_Value("statistics","tc",f"number='{number}'")
-    def delete_statistics_row(self,number):
-        self.delete_Row("statistics",f"number='{number}'")
-    def calculate_Formulas(self,number,dispatch_date,arrival_date,raw_material_cost,production_time):
-        pc=production_time
-        dc=raw_material_cost*(dispatch_date-arrival_date)*0.01
-        tc=dc+pc+raw_material_cost
-        self.update_rc(number,raw_material_cost)
-        self.update_tc(number,tc)
-        self.update_dc(number,dc)
-        self.update_pc(number,pc)
-        self.update_dd(number,dispatch_date)
-        self.update_ad(number,arrival_date)
+        return self.read_Value("stock", "quantity", "piece='P2'")
+
+
+class Statistics(Database):
+    def add_statistics_Row(self, number, dc, pc, ad, dd, tc, rc):
+        self.insert_Row("statistics", f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
+
+    def update_dc(self, number, dc):
+        self.update_Value("statistics", f"number='{number}'", f"dc='{dc}'")
+
+    def update_pc(self, number, pc):
+        self.update_Value("statistics", f"number='{number}'", f"pc='{pc}'")
+
+    def update_ad(self, number, ad):
+        self.update_Value("statistics", f"number='{number}'", f"dc='{ad}'")
+
+    def update_dd(self, number, dd):
+        self.update_Value("statistics", f"number='{number}'", f"dd='{dd}'")
+
+    def update_rc(self, number, rc):
+        self.update_Value("statistics", f"number='{number}'", f"rc='{rc}'")
+
+    def update_tc(self, number, tc):
+        self.update_Value("statistics", f"number='{number}'", f"tc='{tc}'")
+
+    def read_dc(self, number):
+        return self.read_Value("statistics", "dc", f"number='{number}'")
+
+    def read_pc(self, number):
+        return self.read_Value("statistics", "pc", f"number='{number}'")
+
+    def read_rc(self, number):
+        return self.read_Value("statistics", "rc", f"number='{number}'")
+
+    def read_ad(self, number):
+        return self.read_Value("statistics", "ad", f"number='{number}'")
+
+    def read_dd(self, number):
+        return self.read_Value("statistics", "dd", f"number='{number}'")
+
+    def read_tc(self, number):
+        return self.read_Value("statistics", "tc", f"number='{number}'")
+
+    def delete_statistics_row(self, number):
+        self.delete_Row("statistics", f"number='{number}'")
+
+    # def calculate_Formulas(self,number,dispatch_date,arrival_date,raw_material_cost,production_time):
+    #     pc=production_time
+    #     dc=raw_material_cost*(dispatch_date-arrival_date)*0.01
+    #     tc=dc+pc+raw_material_cost
+    #     self.update_rc(number,raw_material_cost)
+    #     self.update_tc(number,tc)
+    #     self.update_dc(number,dc)
+    #     self.update_pc(number,pc)
+    #     self.update_dd(number,dispatch_date)
+    #     self.update_ad(number,arrival_date)
+    def calculate_formulas(self, number):
+        # we only send dispatch_date, arrival_date and raw_material_cost
+        piecetype = self.read_Value(self, "orders", "piecetype", f"number='{number}'") # SELECT {value} FROM {table_name} WHERE {condition};
+        dispatch_date = self.read_dd(number)
+        arrival_date = self.read_ad(number)
+        raw_material_cost = self.read_rc(number)
+        pc = self.read_Value("piecetype", "time", f"piecetype='{piecetype}'")  # comes from the piecetime
+        dc = raw_material_cost * (dispatch_date - arrival_date) * 0.01
+        tc = dc + pc + raw_material_cost
+        # self.update_rc(number,raw_material_cost)
+        self.update_tc(number, tc)
+        self.update_dc(number, dc)
+        self.update_pc(number, pc)
+        # self.update_dd(number,dispatch_date)
+        # self.update_ad(number,arrival_date)
+
+    def get_order_total_cost(self, number):
+        self.calculate_formulas(number)
+        return self.read_tc(number)
+
+
 '''
 Example code
 

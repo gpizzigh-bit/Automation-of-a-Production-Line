@@ -3,9 +3,6 @@ import time
 
 import pyfiglet
 from opcua import ua, Client
-from opcua.common.node import Node
-from opcua.common import utils
-from opcua.common import ua_utils
 from termcolor import colored
 from modules.database_orders_class import Database, Stock
 from modules import tcp_comm
@@ -19,6 +16,8 @@ HANDSHAKE_FROM_MES = "HANDSHAKE FROM MES"
 
 P1_RESTOCK_TIME = 7
 P2_RESTOCK_TIME = 6
+
+machines_state=[1,1,2,1]
 
 class ThreadedServer(threading.Thread):
     def __init__(self):
@@ -88,6 +87,7 @@ def tool_changer(machine, new_tool, old_tool):
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_plus"
 
     setting_a_variable_true(string)
+    machines_state[machine-1] = new_tool
 
 def machine_decision(type, next_type, machines_state, first_iteration, id, next_machine_to_use, client):
     pecas_tools = [2, 3, 4, 1, 4, 3, 3]
@@ -830,13 +830,10 @@ def setting_a_variable_true(string):
 def setting_a_variable_false(string):
     var = client.get_node(string)
     var.set_value(False)
-
 def get_variable(string):
     var = client.get_node(string)
     variable = var.get_value()
     return variable
-
-
 def status_decision(c, p, todo):
     if todo == 'store2deliver':
         if p == 3:
@@ -862,8 +859,6 @@ def status_decision(c, p, todo):
         show_terminal_shipping(time, p, n)
         #shipping
         c[p - 3] = 0
-
-
 def show_terminal(requests, id, time, init):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
@@ -1011,7 +1006,6 @@ def show_terminal_shipping(time, p, n):
     print(f'{stringf} {time} segundos')
 
     print('-----------------------------------------------------------------------')
-
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
     #     # check if they are empty
@@ -1038,91 +1032,7 @@ if __name__ == '__main__':
     client = Client(url)
     client.connect()
     c=[0,0,0,0,0,0,0] #peças em armazem
-    machines_state=[1,1,2,1]
     maquina=[0,0]
-
-    requests = [{'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
-
-    while True:
-        #receive and store requests from the erp
-        size=len(requests)
-        id=0
-        first_iteration=1
-        #show_terminal(requests, id, 0, 1)
-        a = time.time()
-
-        for id in range(size):
-            #show_terminal(requests, id, 0, 0)
-            string=requests[id]['workpiece']
-            todo=requests[id]['status']
-            p1_quantity=requests[id]['p1_amount']
-            p2_quantity=requests[id]['p2_amount'] 
-                       
-            if id==3:
-                next_string='0'
-            else:
-                next_string=requests[id+1]['workpiece']
-
-            if todo!=0:
-                aux=machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
-                maquina=aux
-                #atualizar machines_state
-                first_iteration=0
-            else:
-                maquina=0
-                first_iteration=1
-            print(f'about to make a piece on machine {maquina[0]}')
-            switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
-            print('piece done')
-            b = time.time()
-            b=b-a
-            #show_terminal_end(requests, b)
-        break
-
-"""
-    # dados para testar:
-    requests = [{'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-                {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
-    todo = 'store2deliver'
-    string = 7
-    maquina_a_usar = 1
-    id = 3
-    a = 0
-    machines_state = [1, 1, 2, 1]
-    first_iteration = 1
-    maquina = [0, 0]
-    next_string = 7
-    #maquina = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
-    print(maquina)
-    show_terminal(requests, id, 0, 0)
-    show_terminal_end(requests, 10)
-    #show_terminal_shipping(7, 7, 5)"""
-
-"""tcp_process = multiprocessing.Process(target=process_tcp_comm)
-    tcp_process.start()
-
-    # tcp_process = multiprocessing.Process(target=process_tcp_comm)
-    # tcp_process.start()
-    erp_comm_t = CommunicateToERP()
-    erp_comm_t.start()
-    #erp_comm_t.stop()
-
-
-    # erp_comm_t.receive_from_erp()
-    # erp_comm_t.send_to_erp()
-    # erp_comm_t.receive_from_erp()
-    # erp_comm_t.receive_from_erp()
-    # erp_comm_t.receive_from_erp()
-
-
-    # client.disconnect()
-    # switch_case(string, maquina_a_usar, id, client)
-    # erp_comm_t.start()
 
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
@@ -1137,6 +1047,37 @@ if __name__ == '__main__':
                 print(f"Got a new message from the ERP {message}")
                 print()
                 requests=message
+                size = len(requests)
+                id = 0
+                first_iteration = 1
+                show_terminal(requests, id, 0, 1)
+                a = time.time()
+
+                for id in range(size):
+                    show_terminal(requests, id, 0, 0)
+                    string = requests[id]['workpiece']
+                    todo = requests[id]['status']
+                    p1_quantity = requests[id]['p1_amount']
+                    p2_quantity = requests[id]['p2_amount']
+
+                    if id == 3:
+                        next_string = '0'
+                    else:
+                        next_string = requests[id + 1]['workpiece']
+
+                    if todo != 0:
+                        aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1],
+                                               client)
+                        maquina = aux
+                        first_iteration = 0
+                    else:
+                        maquina = 0
+                        first_iteration = 1
+                    print(f'about to make a piece on machine {maquina[0]}')
+                    switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
+                    print('piece done')
+                    b = time.time()
+                    b = b - a
+                    show_terminal_end(requests, b)
         else:
             message_received = False
-    """

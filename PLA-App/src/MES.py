@@ -1,8 +1,3 @@
-# [TODO] Communicate to the Database
-# [TODO] Lost Communication retrive "Last state" from the database
-# [TODO] Execute Orders
-# [TODO] Choose the machine
-
 import threading
 import time
 import pyfiglet
@@ -16,6 +11,9 @@ TCP_PORT = 12345
 
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_MES = "HANDSHAKE FROM MES"
+
+P1_RESTOCK_TIME = 7
+P2_RESTOCK_TIME = 6
 
 class ThreadedServer(threading.Thread):
     def __init__(self):
@@ -36,9 +34,56 @@ class ThreadedServer(threading.Thread):
     def stop(self):
         self.signal_to_stop = True
 
-
 def tool_changer(machine, new_tool, old_tool):
-    print(f'tool changed on machine {machine}, from a T{old_tool} to a T{new_tool}')
+    machine_tools = [
+        [1, 2, 3],
+        [1, 3, 4],
+        [2, 3, 4],
+        [1, 3, 4],
+    ]
+    for i in range(3):
+        if old_tool==machine_tools[machine-1][i]:
+            break
+    #i=posiçao da old_tool na machine_tools
+    for j in range (3):
+        if new_tool==machine_tools[machine-1][j]:
+            break
+    #j=posiçao da new_tool na machine tools
+    if i==0:
+        if j==2:
+            decision="minus"
+        elif j==1:
+            decision="plus"
+    elif i==1:
+        if j == 0:
+            decision = "minus"
+        elif j == 2:
+            decision = "plus"
+    elif i==2:
+        if j == 1:
+            decision = "minus"
+        elif j == 0:
+            decision = "plus"
+
+    if machine == 1 and decision=="minus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_minus"
+    elif machine == 1 and decision == "plus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_plus"
+    elif machine == 2 and decision=="minus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_minus"
+    elif machine == 2 and decision == "plus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_plus"
+    elif machine == 3 and decision=="minus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_minus"
+    elif machine == 3 and decision == "plus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_plus"
+    elif machine == 4 and decision=="minus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_minus"
+    elif machine == 4 and decision == "plus":
+        string = "|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_plus"
+
+    setting_a_variable_true(string)
+
 def machine_decision(type, next_type, machines_state, first_iteration, id, next_machine_to_use):
     pecas_tools = [2, 3, 4, 1, 4, 3, 3]
     # tool needed :P3,P4,P5,P6,P7,P8,P9
@@ -556,221 +601,195 @@ def update_database_P1_P2(increment, type):
 
     db.close()
 
-def switch_case(x, machine_number, todo, c, a, last_machine_used):
+def make_on_m1(towrite, todo, c, p, time):
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
+    setting_an_int_variable(string, towrite)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
+    total = get_variable(string)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
+    setting_an_int_variable(string, time)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
+    setting_a_variable_true(string)
+    time.sleep(total)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_stop"
+    setting_an_int_variable(string, 0)
+    string ="ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.Dif_Time"
+    total = get_variable(string)
+    time.sleep(total)
+    string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
+    setting_a_variable_true(string)
+    if todo == 'makeANDdeliver':
+        time.sleep(8)
+    status_decision(c, p, todo)
+
+def make_on_m2(towrite, todo, c, p, time):
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
+    setting_an_int_variable(string, towrite)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
+    setting_an_int_variable(string, 0)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
+    total = get_variable(string)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
+    setting_a_variable_true(string)
+    time.sleep(total)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_stop"
+    setting_an_int_variable(string, time)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.Dif_Time"
+    total = get_variable(string)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
+    setting_a_variable_true(string)
+    time.spleep(total)
+    if todo == 'makeANDdeliver':
+        time.sleep(8)
+    status_decision(c, p, todo)
+
+def make_on_m3(towrite, todo, c, p, time):
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
+    setting_an_int_variable(string, towrite)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
+    total = get_variable(string)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
+    setting_an_int_variable(string, time)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
+    setting_a_variable_true(string)
+    time.sleep(total)
+    if todo == 'makeANDdeliver':
+        time.sleep(10)
+    status_decision(c, p, todo)
+
+def make_on_m4(towrite, todo, c, p, time):
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
+    setting_an_int_variable(string, towrite)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Dif_Time"
+    total = get_variable(string)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop"
+    setting_an_int_variable(string, time)
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.WH_M4"
+    setting_a_variable_true(string)
+    time.sleep(total)
+    if todo == 'makeANDdeliver':
+        time.sleep(12)
+    status_decision(c, p, todo)
+
+
+
+def switch_case(x, machine_number, todo, c, last_machine_used, p1_quantity, p2_quantity):
     c = c
     p = int(x[1:])
-    if x == 'P1 and P2 restock' or x == 'P1 restock' or x == 'P2 restock':
+    if x == 'P1 and P2 restock':
+        p1_time=p1_quantity*P1_RESTOCK_TIME
+        p2_time=p2_quantity*P2_RESTOCK_TIME
         string1="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
         string2="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
+        setting_a_variable_true(string1)
+        setting_a_variable_true(string2)
+        if p1_time >= p2_time:
+            time.sleep(p2_time)
+            setting_a_variable_false(string2)
+            left=p1_time-p2_time
+            time.sleep(left)
+            setting_a_variable_false(string1)
+        else:
+            time.sleep(p1_time)
+            setting_a_variable_false(string1)
+            left = p2_time - p1_time
+            time.sleep(left)
+            setting_a_variable_false(string1)
+        update_database_P1_P2(p1_quantity, 1)
+        update_database_P1_P2(p2_quantity, 2)
+
+    elif x == 'P1 restock':
+        p1_time = p1_quantity * P1_RESTOCK_TIME
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+        setting_a_variable_true(string)
+        time.sleep(p1_time)
+        setting_a_variable_false(string)
+        update_database_P1_P2(p1_quantity, 1)
+
+    elif x== 'P2 restock':
+        p2_time = p2_quantity * P2_RESTOCK_TIME
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+        setting_a_variable_true(string)
+        time.sleep(p2_time)
+        setting_a_variable_false(string)
+        update_database_P1_P2(p2_quantity, 2)
 
     elif x == 'P3':
         towrite = 2
+        update_database_P1_P2(-1, 2)
+        time = 10
         if machine_number == 1:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-
+            make_on_m1(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
+            make_on_m3(towrite, todo, c, p, time)
 
     elif x == 'P4':
-        towrite = 2  # peça a pegar do armazem
+        towrite = 2
+        update_database_P1_P2(-1, 2)
+        time = 10
         if machine_number == 1:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-
+            make_on_m1(towrite, todo, c, p, time)
         elif machine_number == 2:
-            string1 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            string3 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
-
-
+            make_on_m2(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-
+            make_on_m3(towrite, todo, c, p, time)
         elif machine_number == 4:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.WH_M4"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-
+            make_on_m4(towrite, todo, c, p, time)
 
     elif x == 'P5':
-        print("You are going to make a P5 from a P9, using a T4")
-        towrite = 9  # peça a pegar do armazem
+        towrite = 9
+        time=15
         if machine_number == 2:
-            string1 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            string3 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
+            make_on_m2(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 15)
-            status_decision(c, p, todo)
+            make_on_m3(towrite, todo, c, p, time)
         elif machine_number == 4:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.WH_M4"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop"
-            setting_an_int_variable(string, 15)
-            status_decision(c, p, todo)
-
-
+            make_on_m4(towrite, todo, c, p, time)
 
     elif x == 'P6':
-        print("You are going to make a P6 from a P3, using a T1")
-        towrite = 3  # peça a pegar do armazem
+        towrite = 1
+        update_database_P1_P2(-1, 1)
+        time=20
         if machine_number == 1:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-        # elif machine_number == 2:
-        # elif machine_number == 4:
-
+            make_on_m1(towrite, todo, c, p, time)
+        elif machine_number == 2:
+            make_on_m2(towrite, todo, c, p, time)
+        elif machine_number == 4:
+            make_on_m4(towrite, todo, c, p, time)
 
     elif x == 'P7':
-        print("You are going to make a P7 from a P4, using a T4")
-        towrite = 4  # peça a pegar do armazem
+        towrite = 4
+        time=10
         if machine_number == 2:
+            make_on_m1(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-        # elif machine_number == 4:
-
+            make_on_m3(towrite, todo, c, p, time)
+        elif machine_number == 4:
+            make_on_m4(towrite, todo, c, p, time)
 
     elif x == 'P8':
-        print("You are going to make a P8 from a P6, using a T3")
-        towrite = 6  # peça a pegar do armazem
+        towrite = 6
+        time=30
         if machine_number == 1:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
+            make_on_m1(towrite, todo, c, p, time)
         elif machine_number == 2:
+            make_on_m2(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-        # elif machine_number == 4:
-
+            make_on_m3(towrite, todo, c, p, time)
+        elif machine_number == 4:
+            make_on_m4(towrite, todo, c, p, time)
 
     elif x == 'P9':
-        print("You are going to make a P9 from a P7, using a T3")
-        towrite = 7  # peça a pegar do armazem
+        towrite = 7
+        time=10
         if machine_number == 1:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-        # elif machine_number == 2:
+            make_on_m1(towrite, todo, c, p, time)
+        elif machine_number == 2:
+            make_on_m2(towrite, todo, c, p, time)
         elif machine_number == 3:
-            # decidir onde mostar terminal, usando o tempo inicial a p calcular tempo que passou
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
-            setting_an_int_variable(string, towrite)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Dif_Time"
-            total = get_variable(string)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
-            setting_a_variable_true(string)
-            time.sleep(total)
-            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
-            setting_an_int_variable(string, 10)
-            status_decision(c, p, todo)
-        # elif machine_number == 4:
+            make_on_m3(towrite, todo, c, p, time)
+        elif machine_number == 4:
+            make_on_m4(towrite, todo, c, p, time)
 
 
 def setting_an_int_variable(string, towrite):
@@ -794,7 +813,7 @@ def get_variable(string):
     return variable
 
 
-def status_decision(c, p, todo):  # por acabar !!!!
+def status_decision(c, p, todo):
     if todo == 'store2deliver':
         if p == 3:
             c[0] = c[0] + 1
@@ -812,8 +831,12 @@ def status_decision(c, p, todo):  # por acabar !!!!
             c[6] = c[6] + 1
     elif todo == 'makeANDdeliver':
         n = c[p - 3]
-        # enviar as peças. parametros: p (inteiro) ; numero de peças: n
+        string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Piece_Type"
+        setting_an_int_variable(string, p)
+        string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp"
+        setting_an_int_variable(string, n)
         show_terminal_shipping(requests, time, p, n)
+        #shipping
         c[p - 3] = 0
 
 
@@ -1023,6 +1046,8 @@ if __name__ == '__main__':
             show_terminal(requests, id, 0, 0)
             string=requests[id]['workpiece']
             todo=requests[id]['status']
+            p1_quantity=requests[id]['p1_amount']
+            p2_quantity=requests[id]['p2_amount']            
             if id==4:
                 next_string='0'
             else:
@@ -1034,29 +1059,30 @@ if __name__ == '__main__':
             else:
                 maquina=0
                 first_iteration=1
-            switch_case(string, maquina[0], todo, c, a, last_machine_used)
+            switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity)
             b = time.time()
             b=b-a
             show_terminal_end(requests, b)"""
 
 
     # dados para testar:
-    requests = [{'workpiece': 'P7', 'status': 'store2deliver'},
-                {'workpiece': 'P7', 'status': 'store2deliver'},
-                {'workpiece': 'P7', 'status': 'store2deliver'},
-                {'workpiece': 'P6', 'status': 'makeANDdeliver'}]
+    requests = [{'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P7', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
     todo = 'store2deliver'
     string = 7
     maquina_a_usar = 1
-    id = 0
+    id = 3
     a = 0
     machines_state = [1, 1, 2, 1]
     first_iteration = 1
     maquina = [0, 0]
     next_string = 7
-    maquina = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1])
+    #maquina = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1])
     print(maquina)
-    #show_terminal_end(requests, 10)
+    show_terminal(requests, id, 0, 0)
+    show_terminal_end(requests, 10)
     #show_terminal_shipping(requests, 7, 7, 5)
 
     # switch_case(string, maquina_a_usar, todo, a)

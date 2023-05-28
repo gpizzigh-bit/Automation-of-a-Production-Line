@@ -362,6 +362,19 @@ class statistics(Database):
         self.update_pc(number,pc)
         self.update_dd(number,dispatch_date)
         self.update_ad(number,arrival_date)
+class PiecestoPurchase(Database):
+    def add_Piece_To_Purchase(self,piece,quantity,date):
+        self.insert_Row("piecestopurchase",f"'{piece}','{quantity}','{date}'")
+    def delete_Piece_To_Purchase(self,piece):
+        self.delete_Row("piecestopurchase",f"piece='{piece}'")
+    def read_PieceQuantity(self,piece):
+        self.read_Value("piecestopurchase","quantity",f"piece='{piece}'")
+    def read_Pieces_To_Purchase_Date(self,piece):
+        self.read_Value("piecestopurchase","date",f"piece='{piece}'")
+    def Update_Pieces_To_Purchase_Date(self,piece,date):
+        self.update_Value("piecestopurchase",f"piece='{piece}'",f"date='{date}'")
+    def Update_Pieces_To_Purchase_Quantity(self,piece,quantity):
+        self.update_Value("piecestopurchase",f"piece='{piece}'",f"quantity='{quantity}'")
 '''
 Example code
 

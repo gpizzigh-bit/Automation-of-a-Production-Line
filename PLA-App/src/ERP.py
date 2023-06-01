@@ -25,7 +25,7 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 
-day_time = 5
+day_time = 60
 
 mps = MPS.Scheduler()
 terminal = terminal_class.ErpTerminal()
@@ -75,7 +75,7 @@ def calculate_cost_for_each_order(order):
     # Dd = 10  # <- MES
     # stat_obj.update_ad(order_number, Ad)
     # stat_obj.update_dc(order_number, )
-    #print(order[' quantity'] * stat_obj.read_tc(order_dic[' number']))
+    # print(order[' quantity'] * stat_obj.read_tc(order_dic[' number']))
     pass
 
 
@@ -110,6 +110,10 @@ def find_the_dispatch_day_of_each_order(nested_list):
             stat_obj.update_dd(order_dic['number'], order_day_index)
 
 
+def remove_whitespace(string):
+    return ''.join(string.split())
+
+
 def show_interface(day_index):
     days_ahead = 5
 
@@ -139,7 +143,7 @@ def show_interface(day_index):
     stats = database_orders_class.Statistics()
     for order in pending_orders[:days_ahead]:
         order_dic = dict(subString.split(":") for subString in order.split(";"))
-        print(f"order number: {order_dic['number']} Total cost: {stats.read_tc(order_dic['number'])}")
+        print(f"order number:{order_dic['number']} Total cost: {stats.get_order_total_cost(remove_whitespace(order_dic['number']))}")
 
     print(f"///////////// MPS {days_ahead}-days ahead /////////////")
     mps.show_day_ahead_schedule(day_index, days_ahead)
@@ -169,7 +173,7 @@ def simulate_day_cycle():
             os.system('cls')
             day_index += 1
             if day_index >= len(mps.get_plans_list()):
-                sys.exit(1)
+                sys.exit(1)  # this is just a security may halt the program
             show_interface(day_index)
             start_time = current_time = 0
             next_time = start_time + send_message_after_x_seconds

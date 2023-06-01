@@ -4,6 +4,7 @@ made by: Gabriel Pizzighini Salvador (gpizzigh-bit)
 """
 
 import math
+import time
 
 from .database_orders_class import Orders, Stock, Statistics
 
@@ -250,9 +251,18 @@ class Scheduler:
         # get the pending orders form the database
         pending_orders_obj = Orders()
         pending_orders = pending_orders_obj.read_All_Orders()
-        for order in pending_orders:
-            self.order_dic = dict(subString.split(":") for subString in order.split(";"))
-            self.order_list.append(self.order_dic)
+        if len(pending_orders) == 0:
+            print("Waiting for new orders", end='')
+        while True:
+            pending_orders = pending_orders_obj.read_All_Orders()  # update the pending orders
+            if len(pending_orders) != 0:
+                for order in pending_orders:
+                    self.order_dic = dict(subString.split(":") for subString in order.split(";"))
+                    self.order_list.append(self.order_dic)
+                break
+            else:
+                print(".", end='')
+                time.sleep(1)
 
     def find_last_deadline(self):
         for _ in range(0, len(self.order_list) - 1):
@@ -527,7 +537,6 @@ class Scheduler:
         for order in self.nested_result_list[:days_ahead]:
             if not not order:
                 # if not empty
-                print(order)
                 if order[0]['workpiece'] == P1_AND_P2_RESTOCK_STR:
                     print(f"day: {day} ->" f" RESTOCK with suppliers {self.get_suppliers()[0]} for"
                           f" P1 and {self.get_suppliers()[1]} for P2 for a total of {self.total_cost_of_p1 + self.total_cost_of_p2}€ ")

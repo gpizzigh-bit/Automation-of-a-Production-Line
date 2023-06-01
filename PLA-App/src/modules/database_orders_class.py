@@ -80,7 +80,13 @@ class Database():
         self.cur.execute(query)
         self.conn.commit()
         return self.cur.fetchone()[0]
-
+    
+    def get_column_values(self,table_name,column):
+        query=f"SELECT {column} FROM {table_name};"
+        self.cur.execute(query)
+        self.conn.commit()
+        column_values = [row[0] for row in self.cur.fetchall()]
+        return column_values
 
 class Concluded(Database):
 
@@ -395,6 +401,9 @@ class Statistics(Database):
     def get_order_total_cost(self, number):
         self.calculate_formulas(number)
         return self.read_tc(number)
+    
+    def read_All_Order_Numbers(self):
+        return self.get_column_values("statistics","number")
 
 
 class PiecestoPurchase(Database):

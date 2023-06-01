@@ -184,8 +184,7 @@ class Orders(Database):
 
     def read_Order_Number_X(self, order_number):
         col_names = ["number", "workpiece", "quantity", "duedate", "latepen", "earlypen", "clientid"]
-        rows = self.read_Values("orders", "number,workpiece,quantity,duedate,latepen,earlypen,clientid",
-                                f"number={order_number}")
+        rows = self.read_Values("orders", "number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number='{order_number}'")
         result_list = []
         for row in rows:
             row_strings = [f"{col_names[i]}: {str(row[i])}" for i in range(len(col_names))]

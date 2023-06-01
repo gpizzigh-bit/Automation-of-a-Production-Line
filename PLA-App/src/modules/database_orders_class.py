@@ -178,7 +178,7 @@ class Orders(Database):
         self.update_Value("orders", f"number={number}", f"quantity={new_quantity}")
 
     def read_All_Orders(self):
-        col_names = ["number", "workpiece", "quantity", "duedate", "latepen", "earlypen", "clientid"]
+        col_names = ["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         result_list = []
         rows = self.read_Table("orders")
         for row in rows:
@@ -190,7 +190,7 @@ class Orders(Database):
 
     def read_Order_Number_X(self, order_number):
         col_names = ["number", "workpiece", "quantity", "duedate", "latepen", "earlypen", "clientid"]
-        rows = self.read_Values("orders", "number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number='{order_number}'")
+        rows = self.read_Values("orders","number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number='{order_number}'")
         result_list = []
         for row in rows:
             row_strings = [f"{col_names[i]}: {str(row[i])}" for i in range(len(col_names))]
@@ -199,7 +199,7 @@ class Orders(Database):
         return result_list
 
     def read_X_Orders(self, number_of_orders):
-        col_names = ["number", "workpiece", "quantity", "duedate", "latepen", "earlypen", "clientid"]
+        col_names = ["number","workpiece","quantity","duedate","latepen","earlypen","clientid"]
         rows = self.read_Table("orders")
         result_list = []
         a = 0
@@ -217,7 +217,7 @@ class Orders(Database):
         return Latest
 
     def read_Workpiece(self, number):
-        self.read_Value(self, "orders", "piecetype", f"number='{number}'")
+        self.read_Value(self, "orders","piecetype",f"number='{number}'")
 
 
 class Clients(Database):
@@ -287,16 +287,16 @@ class PieceTime(Database):
     # Piecetime table subclass
 
     def add_Piece(self, piecetype, time):
-        self.insert_Row("piecetime", f"{piecetype},'{time}'")
+        self.insert_Row("piecetime",f"{piecetype},'{time}'")
 
     def delete_Piece(self, piecetype):
-        self.delete_Row("piecetime", f"piecetype='{piecetype}'")
+        self.delete_Row("piecetime",f"piecetype='{piecetype}'")
 
     def Update_Time(self, piecetype, time):
-        self.update_Value("piecetime", f"piecetype='{piecetype}'", f"time={time}")
+        self.update_Value("piecetime",f"piecetype='{piecetype}'", f"time={time}")
 
     def read_PieceTime(self, piecetype):
-        self.read_Value("piecetype", "time", f"piecetype='{piecetype}'")
+        self.read_Value("piecetype","time", f"piecetype='{piecetype}'")
 
 
 class Stock(Database):
@@ -330,46 +330,46 @@ class Statistics(Database):
     #Statistics Table subclass
 
     def add_statistics_Row(self, number, dc, pc, ad, dd, tc, rc):
-        self.insert_Row("statistics", f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
+        self.insert_Row("statistics",f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
 
     def update_dc(self, number, dc):
-        self.update_Value("statistics", f"number='{number}'", f"dc='{dc}'")
+        self.update_Value("statistics",f"number='{number}'", f"dc='{dc}'")
 
     def update_pc(self, number, pc):
-        self.update_Value("statistics", f"number='{number}'", f"pc='{pc}'")
+        self.update_Value("statistics",f"number='{number}'", f"pc='{pc}'")
 
     def update_ad(self, number, ad):
-        self.update_Value("statistics", f"number='{number}'", f"dc='{ad}'")
+        self.update_Value("statistics",f"number='{number}'", f"dc='{ad}'")
 
     def update_dd(self, number, dd):
-        self.update_Value("statistics", f"number='{number}'", f"dd='{dd}'")
+        self.update_Value("statistics",f"number='{number}'", f"dd='{dd}'")
 
     def update_rc(self, number, rc):
-        self.update_Value("statistics", f"number='{number}'", f"rc='{rc}'")
+        self.update_Value("statistics",f"number='{number}'", f"rc='{rc}'")
 
     def update_tc(self, number, tc):
-        self.update_Value("statistics", f"number='{number}'", f"tc='{tc}'")
+        self.update_Value("statistics",f"number='{number}'", f"tc='{tc}'")
 
     def read_dc(self, number):
-        return self.read_Value("statistics", "dc", f"number='{number}'")
+        return self.read_Value("statistics", "dc",f"number='{number}'")
 
     def read_pc(self, number):
-        return self.read_Value("statistics", "pc", f"number='{number}'")
+        return self.read_Value("statistics", "pc",f"number='{number}'")
 
     def read_rc(self, number):
-        return self.read_Value("statistics", "rc", f"number='{number}'")
+        return self.read_Value("statistics", "rc",f"number='{number}'")
 
     def read_ad(self, number):
-        return self.read_Value("statistics", "ad", f"number='{number}'")
+        return self.read_Value("statistics", "ad",f"number='{number}'")
 
     def read_dd(self, number):
-        return self.read_Value("statistics", "dd", f"number='{number}'")
+        return self.read_Value("statistics", "dd",f"number='{number}'")
 
     def read_tc(self, number):
-        return self.read_Value("statistics", "tc", f"number='{number}'")
+        return self.read_Value("statistics", "tc",f"number='{number}'")
 
     def delete_statistics_row(self, number):
-        self.delete_Row("statistics", f"number='{number}'")
+        self.delete_Row("statistics",f"number='{number}'")
 
     # def calculate_Formulas(self,number,dispatch_date,arrival_date,raw_material_cost,production_time):
     #     pc=production_time

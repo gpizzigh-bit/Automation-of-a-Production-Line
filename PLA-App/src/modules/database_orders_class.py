@@ -333,40 +333,40 @@ class Statistics(Database):
         self.insert_Row("statistics", f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
 
     def update_dc(self, number, dc):
-        self.update_Value("statistics", f"number='{number}'", f"dc='{dc}'")
+        self.update_Value("statistics", f"number=' {number}'", f"dc='{dc}'")
 
     def update_pc(self, number, pc):
-        self.update_Value("statistics", f"number='{number}'", f"pc='{pc}'")
+        self.update_Value("statistics", f"number=' {number}'", f"pc='{pc}'")
 
     def update_ad(self, number, ad):
-        self.update_Value("statistics", f"number='{number}'", f"dc='{ad}'")
+        self.update_Value("statistics", f"number=' {number}'", f"ad={ad}")
 
     def update_dd(self, number, dd):
-        self.update_Value("statistics", f"number='{number}'", f"dd='{dd}'")
+        self.update_Value("statistics", f"number=' {number}'", f"dd='{dd}'")
 
     def update_rc(self, number, rc):
-        self.update_Value("statistics", f"number='{number}'", f"rc='{rc}'")
+        self.update_Value("statistics", f"number=' {number}'", f"rc='{rc}'")
 
     def update_tc(self, number, tc):
-        self.update_Value("statistics", f"number='{number}'", f"tc='{tc}'")
+        self.update_Value("statistics", f"number=' {number}'", f"tc='{tc}'")
 
     def read_dc(self, number):
-        return self.read_Value("statistics", "dc", f"number='{number}'")
+        return self.read_Value("statistics", "dc", f"number=' {number}'")
 
     def read_pc(self, number):
-        return self.read_Value("statistics", "pc", f"number='{number}'")
+        return self.read_Value("statistics", "pc", f"number=' {number}'")
 
     def read_rc(self, number):
-        return self.read_Value("statistics", "rc", f"number='{number}'")
+        return self.read_Value("statistics", "rc", f"number=' {number}'")
 
     def read_ad(self, number):
-        return self.read_Value("statistics", "ad", f"number='{number}'")
+        return self.read_Value("statistics", "ad", f"number=' {number}'")
 
     def read_dd(self, number):
-        return self.read_Value("statistics", "dd", f"number='{number}'")
+        return self.read_Value("statistics", "dd", f"number=' {number}'")
 
     def read_tc(self, number):
-        return self.read_Value("statistics", "tc", f"number='{number}'")
+        return self.read_Value("statistics", "tc", f"number=' {number}'")
 
     def delete_statistics_row(self, number):
         self.delete_Row("statistics", f"number='{number}'")
@@ -383,12 +383,12 @@ class Statistics(Database):
     #     self.update_ad(number,arrival_date)
     def calculate_formulas(self, number):
         # we only send dispatch_date, arrival_date and raw_material_cost
-        piecetype = self.read_Value(self, "orders", "piecetype",
+        piecetype = self.read_Value("orders", "workpiece",
                                     f"number='{number}'")  # SELECT {value} FROM {table_name} WHERE {condition};
         dispatch_date = self.read_dd(number)
         arrival_date = self.read_ad(number)
         raw_material_cost = self.read_rc(number)
-        pc = self.read_Value("piecetype", "time", f"piecetype='{piecetype}'")  # comes from the piecetime
+        pc = self.read_Value("piecetime", "time", f"pieces='{piecetype}'")  # comes from the piecetime
         dc = raw_material_cost * (dispatch_date - arrival_date) * 0.01
         tc = dc + pc + raw_material_cost
         # self.update_rc(number,raw_material_cost)
@@ -403,7 +403,7 @@ class Statistics(Database):
         return self.read_tc(number)
     
     def read_All_Order_Numbers(self):
-        return self.get_column_values("statistics","number")
+        return self.get_column_values("statistics", "number")
 
 
 class PiecestoPurchase(Database):

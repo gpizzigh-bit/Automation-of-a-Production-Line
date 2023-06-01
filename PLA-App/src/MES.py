@@ -4,9 +4,10 @@ import time
 import pyfiglet
 from opcua import ua, Client
 from termcolor import colored
-from modules.database_orders_class import Database, Stock
+from modules.database_orders_class import Database, Stock, Orders, Concluded, Statistics
 from modules import tcp_comm
 import numpy as np
+from constants.local_constants import *
 
 TCP_IP = "127.0.0.1"  # local
 TCP_PORT = 12345
@@ -17,7 +18,12 @@ HANDSHAKE_FROM_MES = "HANDSHAKE FROM MES"
 P1_RESTOCK_TIME = 7
 P2_RESTOCK_TIME = 6
 
-machines_state=[1,1,2,1]
+machines_state = [1, 1, 2, 1]
+
+orders_obj = Orders()
+conclude_obj = Concluded()
+stats = Statistics()
+
 
 class ThreadedServer(threading.Thread):
     def __init__(self):
@@ -38,6 +44,7 @@ class ThreadedServer(threading.Thread):
     def stop(self):
         self.signal_to_stop = True
 
+
 def tool_changer(machine, new_tool, old_tool):
     machine_tools = [
         [1, 2, 3],
@@ -46,28 +53,28 @@ def tool_changer(machine, new_tool, old_tool):
         [1, 3, 4],
     ]
     for i in range(3):
-        if old_tool==machine_tools[machine-1][i]:
+        if old_tool == machine_tools[machine - 1][i]:
             break
-    #i=posiçao da old_tool na machine_tools
-    for j in range (3):
-        if new_tool==machine_tools[machine-1][j]:
+    # i=posiçao da old_tool na machine_tools
+    for j in range(3):
+        if new_tool == machine_tools[machine - 1][j]:
             break
-    #j=posiçao da new_tool na machine tools
+    # j=posiçao da new_tool na machine tools
 
     decision = "empty"
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_minus"
 
-    if i==0:
-        if j==2:
-            decision="minus"
-        elif j==1:
-            decision="plus"
-    elif i==1:
+    if i == 0:
+        if j == 2:
+            decision = "minus"
+        elif j == 1:
+            decision = "plus"
+    elif i == 1:
         if j == 0:
             decision = "minus"
         elif j == 2:
             decision = "plus"
-    elif i==2:
+    elif i == 2:
         if j == 1:
             decision = "minus"
         elif j == 0:
@@ -91,41 +98,42 @@ def tool_changer(machine, new_tool, old_tool):
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_plus"
 
     setting_a_variable_true(string)
-    machines_state[machine-1] = new_tool
+    machines_state[machine - 1] = new_tool
     print(f'changing from T{old_tool} to a T{new_tool} on machine {machine}')
+
 
 def machine_decision(type, next_type, machines_state, first_iteration, id, next_machine_to_use, client):
     import time
     pecas_tools = [2, 3, 4, 1, 4, 3, 3]
     # tool needed :P3,P4,P5,P6,P7,P8,P9
-    options=[
-        [1,3]  ,     #P3: M1, M3
-        [2,1,3,4] ,  #P4: M2, M1, M3, M4
-        [2,3,4] ,    #P5: M2, M3, M4
-        [2,1,4] ,    #P6: M2, M1, M4
-        [2,3,4]  ,   #P7: M2, M3, M4
-        [2,1,3,4] ,  #P8: M2, M1, M3, M4
-        [2,1,3,4,]   #P9: M2, M1, M3, M4
+    options = [
+        [1, 3],  # P3: M1, M3
+        [2, 1, 3, 4],  # P4: M2, M1, M3, M4
+        [2, 3, 4],  # P5: M2, M3, M4
+        [2, 1, 4],  # P6: M2, M1, M4
+        [2, 3, 4],  # P7: M2, M3, M4
+        [2, 1, 3, 4],  # P8: M2, M1, M3, M4
+        [2, 1, 3, 4, ]  # P9: M2, M1, M3, M4
     ]
 
-    if id!=3:
+    if id != 3:
         type = int(type[1:])
         next_type = int(next_type[1:])
-        tool_needed=pecas_tools[type-3]
-        next_tool_needed=pecas_tools[next_type-3]
-        machines_possible=options[type-3]
+        tool_needed = pecas_tools[type - 3]
+        next_tool_needed = pecas_tools[next_type - 3]
+        machines_possible = options[type - 3]
         next_machines_possible = options[next_type - 3]
-        i=0
+        i = 0
 
         if type == 3:
             if first_iteration == 1:
-                machine_to_use=0
+                machine_to_use = 0
                 next_machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -134,8 +142,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -145,52 +157,60 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 4:
             if first_iteration == 1:
                 next_machine_to_use = 0
-                machine_to_use=0
+                machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -199,8 +219,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -210,52 +234,60 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 5:
             if first_iteration == 1:
                 next_machine_to_use = 0
-                machine_to_use=0
+                machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -264,8 +296,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -275,41 +311,49 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 6:
@@ -320,7 +364,7 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -329,8 +373,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -340,52 +388,60 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 7:
-            if first_iteration==1:
+            if first_iteration == 1:
                 next_machine_to_use = 0
                 machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -394,63 +450,75 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
                         break
 
-            if next_machine_to_use==0:
-                if machine_to_use==2:
+            if next_machine_to_use == 0:
+                if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
-                        if next_machines_possible[i]==3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        if next_machines_possible[i] == 3:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                        elif next_machines_possible[i]==4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        elif next_machines_possible[i] == 4:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                elif machine_to_use==1:
+                elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
-                        if next_machines_possible[i]==3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        if next_machines_possible[i] == 3:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                        elif next_machines_possible[i]==4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        elif next_machines_possible[i] == 4:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                elif machine_to_use==3:
+                elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
-                        if next_machines_possible[i]==2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        if next_machines_possible[i] == 2:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                        elif next_machines_possible[i]==1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        elif next_machines_possible[i] == 1:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                elif machine_to_use==4:
+                elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
-                        if next_machines_possible[i]==2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        if next_machines_possible[i] == 2:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
-                        elif next_machines_possible[i]==1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i]-1])
+                        elif next_machines_possible[i] == 1:
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 8:
             if first_iteration == 1:
                 next_machine_to_use = 0
-                machine_to_use=0
+                machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -459,8 +527,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -470,52 +542,60 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
         elif type == 9:
             if first_iteration == 1:
                 next_machine_to_use = 0
-                machine_to_use=0
+                machine_to_use = 0
                 for i in range(len(machines_possible)):
                     if tool_needed == machines_state[machines_possible[i] - 1]:
                         machine_to_use = machines_possible[i]
                         break
-                if machine_to_use==0:
+                if machine_to_use == 0:
                     tool_changer(machines_possible[0], tool_needed, machines_state[machines_possible[0] - 1])
                     time.sleep(20)
                     machine_to_use = machines_possible[0]
@@ -524,8 +604,12 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 next_machine_to_use = 0
 
             for i in range(len(next_machines_possible)):
-                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[i] != machine_to_use:
-                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (next_machines_possible[i] == 1 and machine_to_use == 2) or (next_machines_possible[i] == 3 and machine_to_use == 4) or (next_machines_possible[i] == 4 and machine_to_use == 3)):
+                if next_tool_needed == machines_state[next_machines_possible[i] - 1] and next_machines_possible[
+                    i] != machine_to_use:
+                    if ((next_machines_possible[i] == 2 and machine_to_use == 1) or (
+                            next_machines_possible[i] == 1 and machine_to_use == 2) or (
+                            next_machines_possible[i] == 3 and machine_to_use == 4) or (
+                            next_machines_possible[i] == 4 and machine_to_use == 3)):
                         next_machine_to_use = 0
                     else:
                         next_machine_to_use = next_machines_possible[i]
@@ -535,62 +619,72 @@ def machine_decision(type, next_type, machines_state, first_iteration, id, next_
                 if machine_to_use == 2:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 1:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 3:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 4:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 3:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                 elif machine_to_use == 4:
                     for i in range(len(next_machines_possible)):
                         if next_machines_possible[i] == 2:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
                         elif next_machines_possible[i] == 1:
-                            tool_changer(next_machines_possible[i], next_tool_needed, machines_state[next_machines_possible[i] - 1])
+                            tool_changer(next_machines_possible[i], next_tool_needed,
+                                         machines_state[next_machines_possible[i] - 1])
                             next_machine_to_use = next_machines_possible[i]
                             break
 
-    elif id==3:
-        machine_to_use=next_machine_to_use
-        next_machine_to_use=0
+    elif id == 3:
+        machine_to_use = next_machine_to_use
+        next_machine_to_use = 0
 
-    results=[machine_to_use, next_machine_to_use]
+    results = [machine_to_use, next_machine_to_use]
     return results
 
+
 def update_database_P1_P2(increment, type):
-    db=Database()
-    stock=Stock()
-    if type==1:
-        current=stock.read_Stock_P1()
-        new=increment+current
-    elif type==2:
-        current=stock.read_Stock_P2()
-        new=increment+current
+    db = Database()
+    stock = Stock()
+    if type == 1:
+        current = stock.read_Stock_P1()
+        new = increment + current
+    elif type == 2:
+        current = stock.read_Stock_P2()
+        new = increment + current
 
     db.close()
+
 
 def make_on_m1(towrite, todo, c, p, time_needed, requests):
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
@@ -611,7 +705,7 @@ def make_on_m1(towrite, todo, c, p, time_needed, requests):
         sensor = get_variable(string)
         if sensor == False:
             break
-    string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
+    string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
     setting_a_variable_true(string)
     if todo == 'makeANDdeliver':
         while True:
@@ -620,6 +714,7 @@ def make_on_m1(towrite, todo, c, p, time_needed, requests):
             if sensor == True:
                 break
     status_decision(c, p, todo)
+
 
 def make_on_m2(towrite, todo, c, p, time_needed, requests):
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
@@ -651,6 +746,7 @@ def make_on_m2(towrite, todo, c, p, time_needed, requests):
                 break
     status_decision(c, p, todo)
 
+
 def make_on_m3(towrite, todo, c, p, time_needed, requests):
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
     setting_an_int_variable(string, towrite)
@@ -675,6 +771,7 @@ def make_on_m3(towrite, todo, c, p, time_needed, requests):
             if sensor == True:
                 break
     status_decision(c, p, todo)
+
 
 def make_on_m4(towrite, todo, c, p, time_needed, requests):
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
@@ -701,21 +798,22 @@ def make_on_m4(towrite, todo, c, p, time_needed, requests):
                 break
     status_decision(c, p, todo)
 
+
 def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     import time
     c = c
     p = int(x[1:])
     if x == 'P1 and P2 restock':
-        p1_time=p1_quantity*P1_RESTOCK_TIME
-        p2_time=p2_quantity*P2_RESTOCK_TIME
-        string1="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
-        string2="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
+        p1_time = p1_quantity * P1_RESTOCK_TIME
+        p2_time = p2_quantity * P2_RESTOCK_TIME
+        string1 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
         setting_a_variable_true(string1)
         setting_a_variable_true(string2)
         if p1_time >= p2_time:
             time.sleep(p2_time)
             setting_a_variable_false(string2)
-            left=p1_time-p2_time
+            left = p1_time - p2_time
             time.sleep(left)
             setting_a_variable_false(string1)
         else:
@@ -767,7 +865,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P5':
         towrite = 9
-        time=15
+        time = 15
         if machine_number == 2:
             make_on_m2(towrite, todo, c, p, time, requests)
         elif machine_number == 3:
@@ -778,7 +876,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     elif x == 'P6':
         towrite = 1
         update_database_P1_P2(-1, 1)
-        time=20
+        time = 20
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -788,7 +886,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P7':
         towrite = 4
-        time=10
+        time = 10
         if machine_number == 2:
             make_on_m2(towrite, todo, c, p, time, requests)
         elif machine_number == 3:
@@ -798,7 +896,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P8':
         towrite = 6
-        time=30
+        time = 30
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -810,7 +908,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P9':
         towrite = 7
-        time=10
+        time = 10
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -820,31 +918,40 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
         elif machine_number == 4:
             make_on_m4(towrite, todo, c, p, time, requests)
 
+
 def setting_an_int_variable(string, towrite):
     towrite16 = int(towrite)
     var = client.get_node(string)
     variant = ua.Variant(towrite16, varianttype=ua.VariantType.Int16)
     data_value = ua.DataValue(variant)
     var.set_value(data_value)
+
+
 def setting_an_int_variable64(string, towrite):
-    towrite=int(towrite)
+    towrite = int(towrite)
     towrite64 = np.int64(towrite)
     var = client.get_node(string)
     variant = ua.Variant(towrite64, varianttype=ua.VariantType.Int64)
     data_value = ua.DataValue(variant)
     var.set_value(data_value)
 
+
 def setting_a_variable_true(string):
     var = client.get_node(string)
     var.set_value(True)
 
+
 def setting_a_variable_false(string):
     var = client.get_node(string)
     var.set_value(False)
+
+
 def get_variable(string):
     var = client.get_node(string)
     variable = var.get_value()
     return variable
+
+
 def status_decision(c, p, todo):
     if todo == 'store2deliver':
         if p == 3:
@@ -863,14 +970,15 @@ def status_decision(c, p, todo):
             c[6] = c[6] + 1
     elif todo == 'makeANDdeliver':
         n = c[p - 3] + 1
-        string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Piece_Type"
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Piece_Type"
         setting_an_int_variable(string, p)
-        string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp"
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp"
         setting_an_int_variable(string, n)
         show_terminal_shipping(p, n)
-        string="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Control.Start"
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Control.Start"
         setting_a_variable_true(string)
         c[p - 3] = 0
+
 
 def show_terminal(requests, id, time, init):
     print('-----------------------------------------------------------------------')
@@ -941,6 +1049,8 @@ def show_terminal(requests, id, time, init):
         print(f'{stringf} {time} segundos')
 
     print('-----------------------------------------------------------------------')
+
+
 def show_terminal_end(requests, time):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
@@ -992,6 +1102,8 @@ def show_terminal_end(requests, time):
         print(f'{stringf} {time} segundos')
 
     print('-----------------------------------------------------------------------')
+
+
 def show_terminal_shipping(p, n):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
@@ -1015,6 +1127,8 @@ def show_terminal_shipping(p, n):
     print(f'{stringf}\n')
 
     print('-----------------------------------------------------------------------')
+
+
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
     #     # check if they are empty
@@ -1033,11 +1147,78 @@ def is_new(old_list, new_list):
             return True
     return False
 
+
 def get_tool(piece_type):
     p = int(piece_type[1:])
     pecas_tools = [2, 3, 4, 1, 4, 3, 3]
 
-    return pecas_tools[p-3]
+    return pecas_tools[p - 3]
+
+
+def search_for_order_id(dict_list):
+    for d in dict_list:
+        if "order_id" in d:
+            return True
+    return False
+
+
+def search_for_restock_order(dict_list):
+    for d in dict_list:
+        if d["workpiece"] in (P1_RESTOCK_STR, P2_RESTOCK_STR, P1_AND_P2_RESTOCK_STR):
+            return True
+    return False
+
+
+def update_arrival_date_for_all_orders(current_day):
+    for order_num in stats.read_All_Order_Numbers():
+        order_num = remove_whitespace(order_num)
+        stats.update_ad(order_num, current_day)
+
+
+def remove_whitespace(string):
+    return ''.join(string.split())
+
+
+def cycle_through_msg_to_get_id(message):
+    for dic in message:
+        if "order_id" in dic:
+            return remove_whitespace(dic['order_id'])
+        else:
+            pass
+
+
+def list_to_dict(lst):
+    result = {}
+    for item in lst:
+        pairs = item.split(';')
+        for pair in pairs:
+            key, value = pair.strip().split(':')
+            result[key] = value.strip()
+    return result
+
+
+def conclude_order(local_order_id: str, current_day):
+    # orders_obj = Orders()
+    # conclude_obj = Concluded()
+    # stats = Statistics()
+    order = orders_obj.read_Order_Number_X(local_order_id)
+    order_dic = list_to_dict(order)
+    number = order_dic['number']
+    work_piece = order_dic['workpiece']
+    quantity = order_dic['quantity']
+    due_date = order_dic['duedate']
+    late_pen = order_dic['latepen']
+    early_pen = order_dic['earlypen']
+    client_id = order_dic['clientid']
+    conclude_obj.add_Concluded(number,
+                               work_piece,
+                               quantity,
+                               due_date,
+                               late_pen,
+                               early_pen,
+                               client_id)
+    stats.update_dd(local_order_id, current_day)
+    orders_obj.delete_Order(number, client_id)
 
 
 if __name__ == '__main__':
@@ -1048,10 +1229,11 @@ if __name__ == '__main__':
     client.connect()
     c=[0,0,0,0,0,0,0] #peças em armazem
     maquina=[0,0]
-"""
+
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
     old_msg = comm_to_erp.get_message()
+    day_cnt = 0
 
     message_received = False
     while True:
@@ -1060,7 +1242,19 @@ if __name__ == '__main__':
             if not message_received:
                 message_received = True
                 print(f"Got a new message from the ERP {message}")
+                day_cnt += 1
                 print()
+                if search_for_order_id(message):
+                    # order is to be concluded today
+                    # move order from the orders schematic to the concluded
+                    # update dispatch day
+                    order_id = cycle_through_msg_to_get_id(message)
+                    conclude_order(order_id, day_cnt)
+                if search_for_restock_order(message):
+                    # update the arrival date for all orders
+                    update_arrival_date_for_all_orders(day_cnt)
+                    # TODO in the future make this dynamic...
+
                 requests=message
                 size = len(requests)
                 id = 0
@@ -1136,3 +1330,4 @@ for id in range(size):
     #b = time.time()
     #b = b - a
     #show_terminal_end(requests, b)
+    """

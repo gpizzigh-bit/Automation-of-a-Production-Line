@@ -211,8 +211,9 @@ class Orders(Database):
         Latest = self.get_Max("Orders", "duedate")
         return Latest
 
-    def read_Workpiece(self,number):
-       self.read_Value(self, "orders", "piecetype", f"number='{number}'")
+    def read_Workpiece(self, number):
+        self.read_Value(self, "orders", "piecetype", f"number='{number}'")
+
 
 class Clients(Database):
 
@@ -377,7 +378,8 @@ class Statistics(Database):
     #     self.update_ad(number,arrival_date)
     def calculate_formulas(self, number):
         # we only send dispatch_date, arrival_date and raw_material_cost
-        piecetype = self.read_Value(self, "orders", "piecetype", f"number='{number}'") # SELECT {value} FROM {table_name} WHERE {condition};
+        piecetype = self.read_Value(self, "orders", "piecetype",
+                                    f"number='{number}'")  # SELECT {value} FROM {table_name} WHERE {condition};
         dispatch_date = self.read_dd(number)
         arrival_date = self.read_ad(number)
         raw_material_cost = self.read_rc(number)
@@ -397,18 +399,25 @@ class Statistics(Database):
 
 
 class PiecestoPurchase(Database):
-    def add_Piece_To_Purchase(self,piece,quantity,date):
-        self.insert_Row("piecestopurchase",f"'{piece}','{quantity}','{date}'")
-    def delete_Piece_To_Purchase(self,piece):
-        self.delete_Row("piecestopurchase",f"piece='{piece}'")
-    def read_PieceQuantity(self,piece):
-        self.read_Value("piecestopurchase","quantity",f"piece='{piece}'")
-    def read_Pieces_To_Purchase_Date(self,piece):
-        self.read_Value("piecestopurchase","date",f"piece='{piece}'")
-    def Update_Pieces_To_Purchase_Date(self,piece,date):
-        self.update_Value("piecestopurchase",f"piece='{piece}'",f"date='{date}'")
-    def Update_Pieces_To_Purchase_Quantity(self,piece,quantity):
-        self.update_Value("piecestopurchase",f"piece='{piece}'",f"quantity='{quantity}'")
+    def add_Piece_To_Purchase(self, piece, quantity, date):
+        self.insert_Row("piecestopurchase", f"'{piece}','{quantity}','{date}'")
+
+    def delete_Piece_To_Purchase(self, piece):
+        self.delete_Row("piecestopurchase", f"piece='{piece}'")
+
+    def read_PieceQuantity(self, piece):
+        self.read_Value("piecestopurchase", "quantity", f"piece='{piece}'")
+
+    def read_Pieces_To_Purchase_Date(self, piece):
+        self.read_Value("piecestopurchase", "date", f"piece='{piece}'")
+
+    def Update_Pieces_To_Purchase_Date(self, piece, date):
+        self.update_Value("piecestopurchase", f"piece='{piece}'", f"date='{date}'")
+
+    def Update_Pieces_To_Purchase_Quantity(self, piece, quantity):
+        self.update_Value("piecestopurchase", f"piece='{piece}'", f"quantity='{quantity}'")
+
+
 '''
 Example code
 

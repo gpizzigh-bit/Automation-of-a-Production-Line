@@ -16,7 +16,7 @@ install(show_locals=True)
 # TODO show the chosen supllier on the terminal
 
 # Constants
-UDP_IP = "127.0.0.1"  # local
+UDP_IP = "0.0.0.0"  # local
 UDP_PORT = 54321
 
 TCP_IP = "127.0.0.1"  # local

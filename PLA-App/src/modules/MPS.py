@@ -14,6 +14,10 @@ def request_piece(workpiece, status):
     return {"workpiece": workpiece, "status": status, "p1_amount": 0, "p2_amount": 0}
 
 
+def request_piece_with_tag(workpiece, status, order_number):
+    return {"workpiece": workpiece, "status": status, "p1_amount": 0, "p2_amount": 0, "order_id": order_number}
+
+
 def request_restock(workpiece, status, p1_amount, p2_amount):
     return {"workpiece": workpiece, "status": status, "p1_amount": p1_amount, "p2_amount": p2_amount}
 
@@ -126,15 +130,16 @@ def create_empty_nested_list(nested_list):
         result.append([])
     return result
 
+
 def has_different_element(lst1, lst2):
     return not set(lst1).issubset(set(lst2))
 
+
 def find_if_p1_or_p2(desired_piece):
-    if desired_piece in ["P3","P4", "P7", "P9", "P5"]:
+    if desired_piece in ["P3", "P4", "P7", "P9", "P5"]:
         return "P2"
     else:
         return "P1"
-
 
 
 def update_all_orders_arrival_day(arraival_day):
@@ -143,7 +148,7 @@ def update_all_orders_arrival_day(arraival_day):
     orders = orders_obj.read_All_Orders()
     for order in orders:
         order_dic = dict(subString.split(":") for subString in order.split(";"))
-        statistics.update_ad(order_dic['number'],arraival_day)
+        statistics.update_ad(order_dic['number'], arraival_day)
 
 
 # def find_make_and_deliver(nested_list, target_workpiece):
@@ -165,7 +170,6 @@ def update_all_orders_arrival_day(arraival_day):
 # def find_the_dispatch_day_of_each_order(nested_list):
 #     orders_obj = Orders()
 #     result = []
-
 
 
 class Scheduler:
@@ -203,9 +207,9 @@ class Scheduler:
                 if order_number != 0:
                     self.schedule_order(order_number)
             self.resolve_all_conflicts()
-            if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
-                # Request a day to only deliver stored ready pieces
-                self.request_delivery_day()
+            # if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
+            #     # Request a day to only deliver stored ready pieces
+            #     self.request_delivery_day()
             self.check_warehouse_status()
             self.lock_current_day()
             self.request_lock_current_day = False
@@ -233,10 +237,10 @@ class Scheduler:
 
         self.resolve_all_conflicts()
         print(".", end='')
-        if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
-            # Request a day to only deliver stored ready pieces
-            self.request_delivery_day()
-            print(".", end='')
+        # if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
+        #     # Request a day to only deliver stored ready pieces
+        #     self.request_delivery_day()
+        #     print(".", end='')
         self.check_warehouse_status()
         print(".Done")
 
@@ -315,6 +319,10 @@ class Scheduler:
                     else:
                         self.nested_result_list[order_deadline - days].append(
                             request_piece(piece_tree[aux], store_local))
+
+                    if store_local == STORE2DELIVER:
+                        self.nested_result_list[order_deadline - days].append(
+                            request_piece_with_tag(piece_tree[aux], store_local, order_number))
                 if days == manufacturing_days - 1:
                     aux = 0  # reset index
                     # here we need to signal to store and deliver the piece
@@ -326,7 +334,7 @@ class Scheduler:
                 # self.nested_result_list[order_deadline - days].append(self.request_piece(order_type, "make&deliver"))
                 for _ in range(0, int(order_total_size / (total_days / manufacturing_days))):
                     self.nested_result_list[order_deadline - days].append(
-                        request_piece(piece_tree[aux], DELIVER_GLOBAL))
+                        request_piece_with_tag(piece_tree[aux], DELIVER_GLOBAL, order_number))
                 aux -= 1
 
         # remove the time consumed
@@ -417,7 +425,7 @@ class Scheduler:
                                                                  self.amount_of_p2_to_restock)
                 total_index += 1
 
-            #update_all_orders_arrival_day(total_index)
+            # update_all_orders_arrival_day(total_index)
 
             self.nested_purchasing_list[total_index - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
                 f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
@@ -449,7 +457,7 @@ class Scheduler:
             desired_index_day = needed_days * max(suppliers[self.p1_supplier]['P1']['delivery_time'],
                                                   suppliers[self.p2_supplier]['P2']['delivery_time'])
 
-            #update_all_orders_arrival_day(desired_index_day)
+            # update_all_orders_arrival_day(desired_index_day)
 
             self.nested_purchasing_list[
                 desired__p1_index_day - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
@@ -519,6 +527,7 @@ class Scheduler:
         for order in self.nested_result_list[:days_ahead]:
             if not not order:
                 # if not empty
+                print(order)
                 if order[0]['workpiece'] == P1_AND_P2_RESTOCK_STR:
                     print(f"day: {day} ->" f" RESTOCK with suppliers {self.get_suppliers()[0]} for"
                           f" P1 and {self.get_suppliers()[1]} for P2 for a total of {self.total_cost_of_p1 + self.total_cost_of_p2}€ ")

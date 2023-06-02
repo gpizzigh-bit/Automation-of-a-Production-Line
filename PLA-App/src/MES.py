@@ -679,9 +679,11 @@ def update_database_P1_P2(increment, type):
     if type == 1:
         current = stock.read_Stock_P1()
         new = increment + current
+        stock.update_Stock_P1(new)
     elif type == 2:
         current = stock.read_Stock_P2()
         new = increment + current
+        stock.update_Stock_P2(new)
 
     db.close()
 

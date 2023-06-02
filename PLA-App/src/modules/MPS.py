@@ -96,6 +96,9 @@ def find_supplier(piece_type: str, quantity: int, delivery_time: int):
                        info[piece_type]['delivery_time'] <= delivery_time and info[piece_type][
                            'min_order_quantity'] <= quantity}
 
+    if valid_suppliers is None:
+        return supplier['C']
+
     # Find the supplier with the lowest cost per piece
     best_supplier = min(valid_suppliers, key=lambda x: valid_suppliers[x][piece_type]['price'])
 

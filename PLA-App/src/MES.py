@@ -802,7 +802,10 @@ def make_on_m4(towrite, todo, c, p, time_needed, requests):
 def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     import time
     c = c
-    p = int(x[1:])
+    p1_quantity=int(p1_quantity)
+    p2_quantity=int(p2_quantity)
+    if todo!="0":
+        p = int(x[1:])
     if x == 'P1 and P2 restock':
         p1_time = p1_quantity * P1_RESTOCK_TIME
         p2_time = p2_quantity * P2_RESTOCK_TIME
@@ -835,7 +838,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P2 restock':
         p2_time = p2_quantity * P2_RESTOCK_TIME
-        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
         setting_a_variable_true(string)
         time.sleep(p2_time)
         setting_a_variable_false(string)
@@ -1269,19 +1272,19 @@ if __name__ == '__main__':
                     p1_quantity = requests[id]['p1_amount']
                     p2_quantity = requests[id]['p2_amount']
 
-                    if id == 3:
+                    if id == (size-1):
                         next_string = '0'
                     else:
                         next_string = requests[id + 1]['workpiece']
 
-                    if todo != 0:
+                    if size != 1:
                         aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
                         maquina = aux
                         machines_state[maquina[0]-1]=get_tool(string)
                         first_iteration = 0
+                        print(f'about to make a piece on machine {maquina[0]}')
                     else:
-                        maquina = 0
-                    print(f'about to make a piece on machine {maquina[0]}')
+                        maquina[0] = 0
                     switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
                     print('piece done')
                     b = time.time()
@@ -1296,6 +1299,8 @@ requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2
             {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
             {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
             {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
+
+#requests = [{'workpiece': 'P1 and P2 restock', 'status': '0', 'p1_amount': '3', 'p2_amount': '5'}]
 
 
 size = len(requests)
@@ -1312,19 +1317,19 @@ for id in range(size):
     p1_quantity = requests[id]['p1_amount']
     p2_quantity = requests[id]['p2_amount']
 
-    if id == 3:
+    if id == (size-1):
         next_string = '0'
     else:
         next_string = requests[id + 1]['workpiece']
 
-    if todo != 0:
+    if size!=1:
         aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
         maquina = aux
         machines_state[maquina[0] - 1] = get_tool(string)
         first_iteration = 0
+        print(f'about to make a piece on machine {maquina[0]}')
     else:
-        maquina = 0
-    print(f'about to make a piece on machine {maquina[0]}')
+        maquina[0] = 0
     switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
     print('piece done')
     #b = time.time()

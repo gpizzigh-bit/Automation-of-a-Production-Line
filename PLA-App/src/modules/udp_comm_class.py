@@ -39,9 +39,9 @@ class ProcessOrders:
         self.ip = ip
         self.port = port
         self.SIG_UPDATE = False
+        print(f" [UDP] Waiting for connection... over {self.ip} : {self.port} ")
 
     def __connect(self):
-        print(f" [UDP] Waiting for connection... over {self.ip} : {self.port} ")
         sock = socket.socket(socket.AF_INET,  # Internet
                              socket.SOCK_DGRAM)  # UDP
         sock.bind((self.ip, self.port))

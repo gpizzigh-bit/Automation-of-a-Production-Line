@@ -268,7 +268,7 @@ class Scheduler:
                 time.sleep(1)
 
     def find_last_deadline(self):
-        for _ in range(0, len(self.order_list) - 1):
+        for _ in range(0, len(self.order_list)):
             aux_deadline = int(self.order_list[_][' duedate'])
             if aux_deadline > self.deadline:
                 self.deadline = aux_deadline  # found the biggest deadline
@@ -315,6 +315,7 @@ class Scheduler:
             total_days = manufacturing_days
             time_to_complete = total_days * 60
 
+
         if order_type in ['P4', 'P7', 'P9', 'P5', 'P3']:
             piece_tree = find_in_tree("P2", order_type)
         elif order_type in ['P6', 'P8']:
@@ -359,7 +360,10 @@ class Scheduler:
 
     def check_for_conflicts(self):
         for day_list in self.nested_result_list:
+            #print("\nday_lst:", day_list)
+            # print("\nnested_result_lst: ", self.nested_result_list)
             if len(day_list) > 4:
+                #print("True")
                 return True
         return False
 
@@ -367,6 +371,7 @@ class Scheduler:
         pos_in_loop = 0
         size_of_nested_list = len(self.nested_result_list)
         # identify conflicts
+        print(self.nested_result_list)
         while self.check_for_conflicts():
             pos_in_nested_list = 0
             for day_list in self.nested_result_list:
@@ -448,6 +453,19 @@ class Scheduler:
 
             # restock_shift_list(self.nested_result_list, 0, needed_days,
             #                    request_piece("P1 and P2 restock", ''))
+        """if amount_of_p2 == 0:
+            needed_days = count_empty_days(self.nested_result_list)
+            self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"]), needed_days)
+            self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+            self.nested_purchasing_list[suppliers[self.p1_supplier]['P1']['delivery_time']].append()
+            desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
+            restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+                               request_restock(P2_RESTOCK_STR, '0', 0, self.amount_of_p2_to_restock))
+
+            # need to implement for these cases too
+            self.nested_purchasing_list[
+                desired_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
+                f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")"""
 
         # compare to the total requested by the pending orders
         if amount_of_p1 < RESTOCK_THRESHOLD["P1"] and amount_of_p2 < RESTOCK_THRESHOLD["P2"]:

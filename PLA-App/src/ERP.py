@@ -25,10 +25,10 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 
-day_time = 60
+day_time = 5
 
 mps = MPS.Scheduler()
-terminal = terminal_class.ErpTerminal()
+#terminal = terminal_class.ErpTerminal()
 day_index = 0
 
 
@@ -157,29 +157,25 @@ def simulate_day_cycle():
     comm_to_mes.start()
     day_index = 0
     mps.first_run()
-    terminal.show_new_plans(mps)
-    # mps.show_schedule()
     send_message_after_x_seconds = 1
     current_time = start_time = 0
     next_time = start_time + send_message_after_x_seconds
     send_current_day = True
-    # initialize terminal
-    # terminal.show_new_plans(mps)
-    # terminal.run()
     while current_time - start_time <= day_time:
         time.sleep(1)  # current time is equal to 1s
         current_time += 1
         if current_time - start_time >= day_time:
             os.system('cls')
             day_index += 1
-            if day_index >= len(mps.get_plans_list()):
-                sys.exit(1)  # this is just a security may halt the program
+            # if day_index >= len(mps.get_plans_list()):
+            #     print(f"halting Program... for {day_index} >= {len(mps.get_plans_list())}")
+            #     sys.exit(1)  # this is just a security may halt the program
             show_interface(day_index)
             start_time = current_time = 0
             next_time = start_time + send_message_after_x_seconds
             pass_to_next_day()
-            terminal.show_new_plans(mps)
-            terminal.change_day(day_index)
+            # terminal.show_new_plans(mps)
+            # terminal.change_day(day_index)
             # mps.show_schedule()
             send_current_day = True
             # mps.show_schedule()
@@ -194,7 +190,7 @@ def simulate_day_cycle():
 
 
 if __name__ == '__main__':
-    terminal = terminal_class.ErpTerminal()
+    #terminal = terminal_class.ErpTerminal()
     p = multiprocessing.Process(target=process_orders)
     day_cycle = multiprocessing.Process(target=simulate_day_cycle)
     p.start()

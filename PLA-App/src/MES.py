@@ -864,7 +864,6 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
         setting_a_variable_false(string2)
         update_database_P1_P2(p2_quantity, 2)
 
-
     elif x == 'P1 restock':
         p1_time = p1_quantity * P1_RESTOCK_TIME
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
@@ -1017,6 +1016,14 @@ def status_decision(c, p, todo):
         show_terminal_shipping(p, n)
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Control.Start"
         setting_a_variable_true(string)
+        while True:
+            string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Finale.Pieces_Delivered"
+            done = get_variable(string)
+            if done == n:
+                string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Control.Start"
+                setting_a_variable_false(string)
+                string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp"
+                setting_an_int_variable(string, 0)
         c[p - 3] = 0
 
 
@@ -1351,10 +1358,12 @@ if __name__ == '__main__':
         b = b - a
         print(f'time= {b}')
         #show_terminal_end(requests, b)"""
-
+    a=time.time()
     make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
     make_on_m4(1, 'store2deliver', c, 6, 20000, 0)
     make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
     make_on_m4(1, 'makeANDdeliver', c, 6, 20000, 0)
+    b=time.time()
+    print(f'total time = {b-a} seg')
 
 

@@ -1,0 +1,292 @@
+[Documents]
+Data%20Access%20View\DocumentType=Data Access View
+Data%20Access%20View\DocumentSettings\headerState="@ByteArray(\0\0\0\xff\0\0\0\0\0\0\0\x1\0\0\0\x1\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x5\x7f\0\0\0\t\x1\0\x1\0\0\0\0\0\0\0\0\0\0\0\0\0\x64\xff\xff\xff\xff\0\0\0\x84\0\0\0\0\0\0\0\x4\0\0\0,\0\0\0\x1\0\0\0\0\0\0\0\x64\0\0\0\x1\0\0\0\0\0\0\x2\x97\0\0\0\x1\0\0\0\0\0\0\x2X\0\0\0\x6\0\0\0\0)"
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\publishingInterval=500
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\lifetimeCount=2400
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\maxKeepAliveCount=10
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\maxNotificationsPerPublish=0
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\priority=0
+Data%20Access%20View\DocumentSettings\SubscriptionSettings\publishingEnabled=true
+Data%20Access%20View\DocumentSettings\Items\000\004\DisplayName=WH_M1
+Data%20Access%20View\DocumentSettings\Items\000\004\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.WH_M1"
+Data%20Access%20View\DocumentSettings\Items\000\004\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\004\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\004\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\004\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\004\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\006\DisplayName=Start
+Data%20Access%20View\DocumentSettings\Items\000\006\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+Data%20Access%20View\DocumentSettings\Items\000\006\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\006\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\006\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\006\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\006\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\008\DisplayName=M1_M2
+Data%20Access%20View\DocumentSettings\Items\000\008\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
+Data%20Access%20View\DocumentSettings\Items\000\008\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\008\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\008\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\008\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\008\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\016\DisplayName=Piece_Type
+Data%20Access%20View\DocumentSettings\Items\000\016\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Piece_Type"
+Data%20Access%20View\DocumentSettings\Items\000\016\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\016\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\016\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\016\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\016\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\000\DisplayName=WH_M4
+Data%20Access%20View\DocumentSettings\Items\000\000\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.WH_M4"
+Data%20Access%20View\DocumentSettings\Items\000\000\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\000\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\000\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\000\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\000\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\001\DisplayName=WH_M3
+Data%20Access%20View\DocumentSettings\Items\000\001\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.WH_M3"
+Data%20Access%20View\DocumentSettings\Items\000\001\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\001\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\001\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\001\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\001\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\005\DisplayName=Piece
+Data%20Access%20View\DocumentSettings\Items\000\005\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
+Data%20Access%20View\DocumentSettings\Items\000\005\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\005\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\005\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\005\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\005\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\009\DisplayName=M2_WH
+Data%20Access%20View\DocumentSettings\Items\000\009\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.M2_WH.M2_WH"
+Data%20Access%20View\DocumentSettings\Items\000\009\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\009\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\009\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\009\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\009\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\013\DisplayName=cmd_stop
+Data%20Access%20View\DocumentSettings\Items\000\013\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop"
+Data%20Access%20View\DocumentSettings\Items\000\013\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\013\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\013\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\013\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\013\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\015\DisplayName=Start
+Data%20Access%20View\DocumentSettings\Items\000\015\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
+Data%20Access%20View\DocumentSettings\Items\000\015\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\015\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\015\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\015\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\015\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\017\DisplayName=Pieces_to_Shipp
+Data%20Access%20View\DocumentSettings\Items\000\017\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_PType.Pieces_to_Shipp"
+Data%20Access%20View\DocumentSettings\Items\000\017\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\017\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\017\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\017\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\017\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\019\DisplayName=cmd_R_minus
+Data%20Access%20View\DocumentSettings\Items\000\019\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_minus"
+Data%20Access%20View\DocumentSettings\Items\000\019\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\019\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\019\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\019\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\019\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\021\DisplayName=cmd_R_minus
+Data%20Access%20View\DocumentSettings\Items\000\021\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_minus"
+Data%20Access%20View\DocumentSettings\Items\000\021\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\021\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\021\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\021\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\021\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\025\DisplayName=cmd_R_minus
+Data%20Access%20View\DocumentSettings\Items\000\025\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_minus"
+Data%20Access%20View\DocumentSettings\Items\000\025\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\025\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\025\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\025\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\025\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\029\DisplayName=I[32]
+Data%20Access%20View\DocumentSettings\Items\000\029\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[32]"
+Data%20Access%20View\DocumentSettings\Items\000\029\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\029\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\029\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\029\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\029\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\031\DisplayName=I[6]
+Data%20Access%20View\DocumentSettings\Items\000\031\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[6]"
+Data%20Access%20View\DocumentSettings\Items\000\031\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\031\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\031\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\031\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\031\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\010\DisplayName=cmd_stop
+Data%20Access%20View\DocumentSettings\Items\000\010\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
+Data%20Access%20View\DocumentSettings\Items\000\010\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\010\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\010\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\010\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\010\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\011\DisplayName=cmd_stop
+Data%20Access%20View\DocumentSettings\Items\000\011\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_stop"
+Data%20Access%20View\DocumentSettings\Items\000\011\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\011\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\011\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\011\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\011\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\018\DisplayName=WH_Piece_Number
+Data%20Access%20View\DocumentSettings\Items\000\018\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.TWH_in.WH_Piece_Number"
+Data%20Access%20View\DocumentSettings\Items\000\018\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\018\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\018\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\018\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\018\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\020\DisplayName=cmd_R_plus
+Data%20Access%20View\DocumentSettings\Items\000\020\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_plus"
+Data%20Access%20View\DocumentSettings\Items\000\020\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\020\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\020\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\020\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\020\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\022\DisplayName=cmd_R_plus
+Data%20Access%20View\DocumentSettings\Items\000\022\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_plus"
+Data%20Access%20View\DocumentSettings\Items\000\022\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\022\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\022\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\022\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\022\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\026\DisplayName=cmd_R_plus
+Data%20Access%20View\DocumentSettings\Items\000\026\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_plus"
+Data%20Access%20View\DocumentSettings\Items\000\026\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\026\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\026\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\026\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\026\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\027\DisplayName=I[1]
+Data%20Access%20View\DocumentSettings\Items\000\027\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[1]"
+Data%20Access%20View\DocumentSettings\Items\000\027\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\027\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\027\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\027\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\027\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\028\DisplayName=I[13]
+Data%20Access%20View\DocumentSettings\Items\000\028\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[13]"
+Data%20Access%20View\DocumentSettings\Items\000\028\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\028\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\028\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\028\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\028\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\030\DisplayName=I[38]
+Data%20Access%20View\DocumentSettings\Items\000\030\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[38]"
+Data%20Access%20View\DocumentSettings\Items\000\030\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\030\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\030\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\030\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\030\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\002\DisplayName=Piece
+Data%20Access%20View\DocumentSettings\Items\000\002\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
+Data%20Access%20View\DocumentSettings\Items\000\002\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\002\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\002\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\002\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\002\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\003\DisplayName=Piece
+Data%20Access%20View\DocumentSettings\Items\000\003\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
+Data%20Access%20View\DocumentSettings\Items\000\003\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\003\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\003\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\003\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\003\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\007\DisplayName=Start
+Data%20Access%20View\DocumentSettings\Items\000\007\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
+Data%20Access%20View\DocumentSettings\Items\000\007\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\007\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\007\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\007\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\007\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\012\DisplayName=cmd_stop
+Data%20Access%20View\DocumentSettings\Items\000\012\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
+Data%20Access%20View\DocumentSettings\Items\000\012\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\012\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\012\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\012\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\012\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\014\DisplayName=Start
+Data%20Access%20View\DocumentSettings\Items\000\014\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
+Data%20Access%20View\DocumentSettings\Items\000\014\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\014\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\014\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\014\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\014\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\023\DisplayName=cmd_R_minus
+Data%20Access%20View\DocumentSettings\Items\000\023\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_minus"
+Data%20Access%20View\DocumentSettings\Items\000\023\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\023\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\023\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\023\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\023\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\024\DisplayName=cmd_R_plus
+Data%20Access%20View\DocumentSettings\Items\000\024\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_plus"
+Data%20Access%20View\DocumentSettings\Items\000\024\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\024\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\024\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\024\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\024\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\032\DisplayName=Start
+Data%20Access%20View\DocumentSettings\Items\000\032\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Control.Start"
+Data%20Access%20View\DocumentSettings\Items\000\032\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\032\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\032\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\032\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\032\MonitoringParameters\SamplingInterval=300
+Data%20Access%20View\DocumentSettings\Items\000\034\DisplayName=Pieces_Delivered
+Data%20Access%20View\DocumentSettings\Items\000\034\NodeId="ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_SH_Finale.Pieces_Delivered"
+Data%20Access%20View\DocumentSettings\Items\000\034\Status=4
+Data%20Access%20View\DocumentSettings\Items\000\034\MonitoringMode=2
+Data%20Access%20View\DocumentSettings\Items\000\034\MonitoringParameters\DiscardOldest=1
+Data%20Access%20View\DocumentSettings\Items\000\034\MonitoringParameters\QueueSize=1
+Data%20Access%20View\DocumentSettings\Items\000\034\MonitoringParameters\SamplingInterval=300
+
+[Attribute%20Plugin]
+Act_OnOff_Checked=true
+
+[Reference%20Plugin]
+Act_OnOff_Checked=true
+Act_ShowHierarchical_Checked=true
+Act_ShowNonHierarchical_Checked=true
+Cmb_BrowseDirection_State=0
+
+[Servers]
+0\Name=OPCUAServer@localhost
+0\Connected=true
+0\ProjectServerId=0
+0\ServerUrl=opc.tcp://LAPTOP-920SGKOK:4840
+0\Server.ApplicationUri=urn:LAPTOP-920SGKOK:3S%20-%20Smart%20Software%20Solutions%20GmbH:CODESYS%20Control%20Win%20V3%20x64:OPCUA:Server
+0\Server.ProductUri=urn:3S%20-%20Smart%20Software%20Solutions%20GmbH:CODESYS%20Control%20Win%20V3%20x64:OPCUA:Server
+0\Server.ApplicationNameLocale=en-Us
+0\Server.ApplicationNameText=OPCUAServer@LAPTOP-920SGKOK
+0\Server.ApplicationType=0
+0\Server.GatewayServerUri=
+0\Server.DiscoveryProfileUri=
+0\Server.NoOfDiscoveryUrls=1
+0\Server.DiscoveryUrl0=opc.tcp://LAPTOP-920SGKOK:4840
+0\ServerCertificate=@ByteArray()
+0\MessageSecurityMode=1
+0\SecurityPolicy=http://opcfoundation.org/UA/SecurityPolicy#None
+0\NoOfUserIdentityTokens=0
+0\TransportProfileUri=http://opcfoundation.org/UA-Profile/Transport/uatcp-uasc-uabinary
+0\SecurityLevel=0
+0\DisplayName=OPCUAServer@localhost
+0\ReverseConnect=false
+0\ClientEndpointUrl=
+0\UserTokenType=0
+0\SessionName=urn:LAPTOP-920SGKOK:UnifiedAutomation:UaExpert
+0\DiscoveryHost=
+0\UserName=
+0\StorePassword=false
+0\CertificateFile=
+0\PrivateKeyFile=
+0\Namespaces\0=http://opcfoundation.org/UA/
+0\Namespaces\1=urn:LAPTOP-920SGKOK:3S%20-%20Smart%20Software%20Solutions%20GmbH:CODESYS%20Control%20Win%20V3%20x64:OPCUA:Server
+0\Namespaces\2=http://opcfoundation.org/UA/DI/
+0\Namespaces\3=http://PLCopen.org/OpcUa/IEC61131-3/
+0\Namespaces\4=CODESYSSPV3/3S/IecVarAccess

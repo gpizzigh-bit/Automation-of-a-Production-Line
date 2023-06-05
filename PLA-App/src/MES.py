@@ -1254,8 +1254,8 @@ if __name__ == '__main__':
     # c=[0,0,0,0,0,0,0] #peças em armazem
     # maquina=[0,0]
 
-    stock.update_Stock_P1(20)
-    stock.update_Stock_P2(0)
+    stock.update_Stock_P1(10)
+    stock.update_Stock_P2(10)
 
     old_msg = comm_to_erp.get_message()
     day_cnt = 0
@@ -1319,6 +1319,7 @@ if __name__ == '__main__':
         else:
             message_received = False
 
+    """
     requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
@@ -1360,12 +1361,6 @@ if __name__ == '__main__':
         b = b - a
         print(f'time= {b}')
         #show_terminal_end(requests, b)"""
-    a=time.time()
-    make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
-    make_on_m4(1, 'store2deliver', c, 6, 20000, 0)
-    make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
-    make_on_m4(1, 'makeANDdeliver', c, 6, 20000, 0)
-    b=time.time()
-    print(f'total time = {b-a} seg')
-'''
+
+
 

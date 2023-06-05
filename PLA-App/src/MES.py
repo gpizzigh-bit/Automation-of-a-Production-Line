@@ -1245,18 +1245,18 @@ def conclude_order(local_order_id: str, current_day):
 
 if __name__ == '__main__':
 
-    # Connect to server
-    url = "opc.tcp://localhost:4840"
-    client = Client(url)
-    client.connect()
-    c=[0,0,0,0,0,0,0] #peças em armazem
-    maquina=[0,0]
-
-    """stock.update_Stock_P1(10)
-    stock.update_Stock_P2(10)
-
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
+    # Connect to server
+    # url = "opc.tcp://localhost:4840"
+    # client = Client(url)
+    # client.connect()
+    # c=[0,0,0,0,0,0,0] #peças em armazem
+    # maquina=[0,0]
+
+    stock.update_Stock_P1(20)
+    stock.update_Stock_P2(0)
+
     old_msg = comm_to_erp.get_message()
     day_cnt = 0
 
@@ -1279,7 +1279,9 @@ if __name__ == '__main__':
                     # update the arrival date for all orders
                     update_arrival_date_for_all_orders(day_cnt)
                     # TODO in the future make this dynamic...
-
+        else:
+            message_received = False
+'''
                 requests=message
                 size = len(requests)
                 id = 0
@@ -1365,5 +1367,5 @@ if __name__ == '__main__':
     make_on_m4(1, 'makeANDdeliver', c, 6, 20000, 0)
     b=time.time()
     print(f'total time = {b-a} seg')
-
+'''
 

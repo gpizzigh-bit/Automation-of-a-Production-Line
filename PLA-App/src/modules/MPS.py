@@ -268,7 +268,7 @@ class Scheduler:
                 time.sleep(1)
 
     def find_last_deadline(self):
-        for _ in range(0, len(self.order_list) - 1):
+        for _ in range(0, len(self.order_list)):
             aux_deadline = int(self.order_list[_][' duedate'])
             if aux_deadline > self.deadline:
                 self.deadline = aux_deadline  # found the biggest deadline
@@ -315,6 +315,7 @@ class Scheduler:
             total_days = manufacturing_days
             time_to_complete = total_days * 60
 
+
         if order_type in ['P4', 'P7', 'P9', 'P5', 'P3']:
             piece_tree = find_in_tree("P2", order_type)
         elif order_type in ['P6', 'P8']:
@@ -359,7 +360,10 @@ class Scheduler:
 
     def check_for_conflicts(self):
         for day_list in self.nested_result_list:
+            #print("\nday_lst:", day_list)
+            # print("\nnested_result_lst: ", self.nested_result_list)
             if len(day_list) > 4:
+                #print("True")
                 return True
         return False
 
@@ -367,6 +371,7 @@ class Scheduler:
         pos_in_loop = 0
         size_of_nested_list = len(self.nested_result_list)
         # identify conflicts
+        print(self.nested_result_list)
         while self.check_for_conflicts():
             pos_in_nested_list = 0
             for day_list in self.nested_result_list:

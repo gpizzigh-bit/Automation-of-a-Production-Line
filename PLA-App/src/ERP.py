@@ -172,8 +172,8 @@ def simulate_day_cycle():
         if current_time - start_time >= day_time:
             os.system('cls')
             day_index += 1
-            if day_index >= len(mps.get_plans_list()):
-                sys.exit(1)  # this is just a security may halt the program
+            # if day_index >= len(mps.get_plans_list()):
+            #     sys.exit(1)  # this is just a security may halt the program
             show_interface(day_index)
             start_time = current_time = 0
             next_time = start_time + send_message_after_x_seconds

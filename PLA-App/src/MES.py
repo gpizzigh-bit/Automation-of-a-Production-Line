@@ -23,6 +23,7 @@ machines_state = [1, 1, 2, 1]
 orders_obj = Orders()
 conclude_obj = Concluded()
 stats = Statistics()
+stock = Stock()
 
 
 class ThreadedServer(threading.Thread):
@@ -689,6 +690,16 @@ def update_database_P1_P2(increment, type):
 
 
 def make_on_m1(towrite, todo, c, p, time_needed, requests):
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
     setting_an_int_variable(string, towrite)
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
@@ -702,11 +713,11 @@ def make_on_m1(towrite, todo, c, p, time_needed, requests):
             break
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_stop"
     setting_an_int_variable64(string, 0)
-    while True:
+    """while True:
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[6]"
         sensor = get_variable(string)
         if sensor == False:
-            break
+            break"""
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.M1_M2.M1_M2"
     setting_a_variable_true(string)
     if todo == 'makeANDdeliver':
@@ -719,6 +730,16 @@ def make_on_m1(towrite, todo, c, p, time_needed, requests):
 
 
 def make_on_m2(towrite, todo, c, p, time_needed, requests):
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M1_1.Piece"
     setting_an_int_variable(string, towrite)
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_stop"
@@ -734,11 +755,11 @@ def make_on_m2(towrite, todo, c, p, time_needed, requests):
         sensor = get_variable(string)
         if sensor == True:
             break
-    while True:
+    """while True:
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[13]"
         sensor = get_variable(string)
         if sensor == False:
-            break
+            break"""
 
     if todo == 'makeANDdeliver':
         while True:
@@ -750,6 +771,16 @@ def make_on_m2(towrite, todo, c, p, time_needed, requests):
 
 
 def make_on_m3(towrite, todo, c, p, time_needed, requests):
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M3.Piece"
     setting_an_int_variable(string, towrite)
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_stop"
@@ -761,11 +792,11 @@ def make_on_m3(towrite, todo, c, p, time_needed, requests):
         sensor = get_variable(string)
         if sensor == True:
             break
-    while True:
+    """while True:
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[32]"
         sensor = get_variable(string)
         if sensor == False:
-            break
+            break"""
     if todo == 'makeANDdeliver':
         while True:
             string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[1]"
@@ -776,6 +807,16 @@ def make_on_m3(towrite, todo, c, p, time_needed, requests):
 
 
 def make_on_m4(towrite, todo, c, p, time_needed, requests):
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
+    while True:
+        string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.free.x"
+        sensor = get_variable(string)
+        if sensor == True:
+            break
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.WH_M4.Piece"
     setting_an_int_variable(string, towrite)
     string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_stop"
@@ -787,11 +828,11 @@ def make_on_m4(towrite, todo, c, p, time_needed, requests):
         sensor = get_variable(string)
         if sensor == True:
             break
-    while True:
+    """while True:
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[38]"
         sensor = get_variable(string)
         if sensor == False:
-            break
+            break"""
     if todo == 'makeANDdeliver':
         while True:
             string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.GVL.I[1]"
@@ -812,23 +853,17 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
         p1_time = p1_quantity * P1_RESTOCK_TIME
         p2_time = p2_quantity * P2_RESTOCK_TIME
         string1 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P1_N1.Start"
-        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
         setting_a_variable_true(string1)
-        setting_a_variable_true(string2)
-        if p1_time >= p2_time:
-            time.sleep(p2_time)
-            setting_a_variable_false(string2)
-            left = p1_time - p2_time
-            time.sleep(left)
-            setting_a_variable_false(string1)
-        else:
-            time.sleep(p1_time)
-            setting_a_variable_false(string1)
-            left = p2_time - p1_time
-            time.sleep(left)
-            setting_a_variable_false(string1)
+        time.sleep(p1_time)
+        setting_a_variable_false(string1)
         update_database_P1_P2(p1_quantity, 1)
+
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.P2_WH.Start"
+        setting_a_variable_true(string2)
+        time.sleep(p2_time)
+        setting_a_variable_false(string2)
         update_database_P1_P2(p2_quantity, 2)
+
 
     elif x == 'P1 restock':
         p1_time = p1_quantity * P1_RESTOCK_TIME
@@ -849,7 +884,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     elif x == 'P3':
         towrite = 2
         update_database_P1_P2(-1, 2)
-        time = 10
+        time = 10000
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 3:
@@ -858,7 +893,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     elif x == 'P4':
         towrite = 2
         update_database_P1_P2(-1, 2)
-        time = 10
+        time = 10000
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -870,7 +905,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P5':
         towrite = 9
-        time = 15
+        time = 15000
         if machine_number == 2:
             make_on_m2(towrite, todo, c, p, time, requests)
         elif machine_number == 3:
@@ -881,7 +916,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     elif x == 'P6':
         towrite = 1
         update_database_P1_P2(-1, 1)
-        time = 20
+        time = 20000
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -891,7 +926,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P7':
         towrite = 4
-        time = 10
+        time = 10000
         if machine_number == 2:
             make_on_m2(towrite, todo, c, p, time, requests)
         elif machine_number == 3:
@@ -901,7 +936,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P8':
         towrite = 6
-        time = 30
+        time = 30000
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -913,7 +948,7 @@ def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
 
     elif x == 'P9':
         towrite = 7
-        time = 10
+        time = 10000
         if machine_number == 1:
             make_on_m1(towrite, todo, c, p, time, requests)
         elif machine_number == 2:
@@ -995,63 +1030,52 @@ def show_terminal(requests, id, time, init):
     pending = 4 - produced
     workpiece_number = [0, 0, 0, 0]
     string1 = '               First Order:'
-    stringf1 = colored(string1, attrs=['bold'])
     string2 = '               Second Order:'
-    stringf2 = colored(string2, attrs=['bold'])
     string3 = '               Third Order:'
-    stringf3 = colored(string3, attrs=['bold'])
     string4 = '               Fourth Order:'
-    stringf4 = colored(string4, attrs=['bold'])
     string5 = '         Status:'
     string6 = '        Status:'
-    stringf5 = colored(string5, attrs=['bold'])
-    stringf6 = colored(string6, attrs=['bold'])
     if len(requests) == 1:
         string = '                             RESTOCK DAY'
         stringg = '          pieces P1 and P2 are being stored in the warehouse'
-        stringf = colored(string, 'red', attrs=['bold'])
-        print(stringf)
+        print(string)
         print(stringg)
     elif len(requests) == 4:
         string = '                  Number of produced pieces today:'
-        stringf = colored(string, 'yellow', attrs=['bold'])
-        print(f'{stringf} {produced}')
+        print(f'{string} {produced}')
         string = '                     Number of pending pieces:'
-        stringf = colored(string, 'yellow', attrs=['bold'])
-        print(f'{stringf} {pending}\n')
+        print(f'{string} {pending}\n')
         string = '                              Orders:'
-        stringf = colored(string, 'red', attrs=['bold'])
-        print(stringf)
+        print(string)
         for i in range(4):
             piece = requests[i]['workpiece']
             number = int(piece[1:])
             workpiece_number[i] = number
         if id == 0:
             if init == 1:
-                print(f'{stringf1} P{workpiece_number[0]}{stringf5} About to start')
+                print(f'{string1} P{workpiece_number[0]}{string5} About to start')
             elif init == 0:
-                print(f'{stringf1} P{workpiece_number[0]}{stringf5} Making the piece')
-            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Waiting')
-            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Waiting')
-            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Waiting\n')
+                print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
+            print(f'{string2} P{workpiece_number[1]}{string6} Waiting')
+            print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
+            print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
         elif id == 1:
-            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
-            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Making the piece')
-            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Waiting')
-            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Waiting\n')
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Making the piece')
+            print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
+            print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
         elif id == 2:
-            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
-            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
-            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Making the piece')
-            print(f'{stringf4} P{workpiece_number[3]} Waiting\n')
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Done')
+            print(f'{string3} P{workpiece_number[2]}{string5} Making the piece')
+            print(f'{string4} P{workpiece_number[3]} Waiting\n')
         elif id == 3:
-            print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
-            print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
-            print(f'{stringf3} P{workpiece_number[2]}{stringf5} Done')
-            print(f'{stringf4} P{workpiece_number[3]}{stringf6} Making the piece\n')
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Done')
+            print(f'{string3} P{workpiece_number[2]}{string5} Done')
+            print(f'{string4} P{workpiece_number[3]}{string6} Making the piece\n')
         string = '           Time passed since production started:'
-        stringf = colored(string, 'green', attrs=['bold'])
-        print(f'{stringf} {time} segundos')
+        print(f'{string} {time} segundos')
 
     print('-----------------------------------------------------------------------')
 
@@ -1066,45 +1090,34 @@ def show_terminal_end(requests, time):
     pending = 0
     workpiece_number = [0, 0, 0, 0]
     string1 = '               First Order:'
-    stringf1 = colored(string1, attrs=['bold'])
     string2 = '               Second Order:'
-    stringf2 = colored(string2, attrs=['bold'])
     string3 = '               Third Order:'
-    stringf3 = colored(string3, attrs=['bold'])
     string4 = '               Fourth Order:'
-    stringf4 = colored(string4, attrs=['bold'])
     string5 = '         Status:'
     string6 = '        Status:'
-    stringf5 = colored(string5, attrs=['bold'])
-    stringf6 = colored(string6, attrs=['bold'])
     if len(requests) == 1:
         string = '                           RESTOCK FINISHED'
         stringg = '            pieces P1 and P2 are now stored in the warehouse'
-        stringf = colored(string, 'red', attrs=['bold'])
-        print(stringf)
+        print(string)
         print(stringg)
     elif len(requests) == 4:
         string = '                  Number of produced pieces today:'
-        stringf = colored(string, 'yellow', attrs=['bold'])
-        print(f'{stringf} {produced}')
+        print(f'{string} {produced}')
         string = '                     Number of pending pieces:'
-        stringf = colored(string, 'yellow', attrs=['bold'])
-        print(f'{stringf} {pending}\n')
+        print(f'{string} {pending}\n')
         string = '                              Orders:'
-        stringf = colored(string, 'red', attrs=['bold'])
-        print(stringf)
+        print(string)
         for i in range(4):
             piece = requests[i]['workpiece']
             number = int(piece[1:])
             workpiece_number[i] = number
 
-        print(f'{stringf1} P{workpiece_number[0]}{stringf5} Done')
-        print(f'{stringf2} P{workpiece_number[1]}{stringf6} Done')
-        print(f'{stringf3} P{workpiece_number[2]}{stringf5} Done')
-        print(f'{stringf4} P{workpiece_number[3]}{stringf6} Done\n')
+        print(f'{string1} P{workpiece_number[0]}{string5} Done')
+        print(f'{string2} P{workpiece_number[1]}{string6} Done')
+        print(f'{string3} P{workpiece_number[2]}{string5} Done')
+        print(f'{string4} P{workpiece_number[3]}{string6} Done\n')
         string = '           Time passed since production started:'
-        stringf = colored(string, 'green', attrs=['bold'])
-        print(f'{stringf} {time} segundos')
+        print(f'{string} {time} segundos')
 
     print('-----------------------------------------------------------------------')
 
@@ -1119,17 +1132,14 @@ def show_terminal_shipping(p, n):
     pending = 0
 
     string = '                  Number of produced pieces today:'
-    stringf = colored(string, 'yellow', attrs=['bold'])
-    print(f'{stringf} {produced}')
+    print(f'{string} {produced}')
     string = '                     Number of pending pieces:'
-    stringf = colored(string, 'yellow', attrs=['bold'])
-    print(f'{stringf} {pending}\n')
+    print(f'{string} {pending}\n')
     n = str(n)
     p = str(p)
     string = '                   Delivering ' + n
     string = string + " pieces of type P" + p
-    stringf = colored(string, 'red', attrs=['bold'])
-    print(f'{stringf}\n')
+    print(f'{string}\n')
 
     print('-----------------------------------------------------------------------')
 
@@ -1235,6 +1245,9 @@ if __name__ == '__main__':
     c=[0,0,0,0,0,0,0] #peças em armazem
     maquina=[0,0]
 
+    """stock.update_Stock_P1(10)
+    stock.update_Stock_P2(10)
+
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
     old_msg = comm_to_erp.get_message()
@@ -1264,7 +1277,8 @@ if __name__ == '__main__':
                 size = len(requests)
                 id = 0
                 first_iteration = 1
-                show_terminal(requests, id, 0, 1)
+                if requests is not None:
+                    show_terminal(requests, id, 0, 1)
                 a = time.time()
 
                 for id in range(size):
@@ -1292,49 +1306,55 @@ if __name__ == '__main__':
                     b = time.time()
                     b = b - a
                     show_terminal_end(requests, b)
+                    print("new day")
         else:
             message_received = False
-"""
+
+    requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+                {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
+
+    #requests = [{'workpiece': 'P1 and P2 restock', 'status': '0', 'p1_amount': '3', 'p2_amount': '5'}]
 
 
-requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-            {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-            {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
-            {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
+    size = len(requests)
+    print(f'size={size}')
+    id = 0
+    first_iteration = 1
+    show_terminal(requests, id, 0, 1)
+    a = time.time()
 
-#requests = [{'workpiece': 'P1 and P2 restock', 'status': '0', 'p1_amount': '3', 'p2_amount': '5'}]
+    for id in range(size):
+        #show_terminal(requests, id, 0, 0)
+        string = requests[id]['workpiece']
+        todo = requests[id]['status']
+        p1_quantity = requests[id]['p1_amount']
+        p2_quantity = requests[id]['p2_amount']
+
+        if id == (size-1):
+            next_string = '0'
+        else:
+            next_string = requests[id + 1]['workpiece']
+
+        if size!=1:
+            aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
+            maquina = aux
+            machines_state[maquina[0] - 1] = get_tool(string)
+            first_iteration = 0
+            print(f'about to make a piece on machine {maquina[0]}')
+        else:
+            maquina[0] = 0
+        switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
+        print('piece done')
+        b = time.time()
+        b = b - a
+        print(f'time= {b}')
+        #show_terminal_end(requests, b)"""
+
+    make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
+    make_on_m4(1, 'store2deliver', c, 6, 20000, 0)
+    make_on_m2(1, 'store2deliver', c, 6, 20000, 0)
+    make_on_m4(1, 'makeANDdeliver', c, 6, 20000, 0)
 
 
-size = len(requests)
-print(f'size={size}')
-id = 0
-first_iteration = 1
-#show_terminal(requests, id, 0, 1)
-a = time.time()
-
-for id in range(size):
-    #show_terminal(requests, id, 0, 0)
-    string = requests[id]['workpiece']
-    todo = requests[id]['status']
-    p1_quantity = requests[id]['p1_amount']
-    p2_quantity = requests[id]['p2_amount']
-
-    if id == (size-1):
-        next_string = '0'
-    else:
-        next_string = requests[id + 1]['workpiece']
-
-    if size!=1:
-        aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1], client)
-        maquina = aux
-        machines_state[maquina[0] - 1] = get_tool(string)
-        first_iteration = 0
-        print(f'about to make a piece on machine {maquina[0]}')
-    else:
-        maquina[0] = 0
-    switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
-    print('piece done')
-    #b = time.time()
-    #b = b - a
-    #show_terminal_end(requests, b)
-    """

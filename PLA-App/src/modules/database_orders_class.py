@@ -405,6 +405,10 @@ class Statistics(Database):
     def read_All_Order_Numbers(self):
         return self.get_column_values("statistics","number")
 
+    def update_All_RC(self,rc):
+        numbers=self.read_All_Order_Numbers
+        for i in range(len(numbers)):
+            self.update_rc(numbers[i],rc)
 
 class PiecestoPurchase(Database):
     def add_Piece_To_Purchase(self, piece, quantity, date):

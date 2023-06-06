@@ -1360,7 +1360,8 @@ if __name__ == '__main__':
         b = time.time()
         b = b - a
         print(f'time= {b}')
-        #show_terminal_end(requests, b)"""
+        #show_terminal_end(requests, b)
+        '''
 
 
 

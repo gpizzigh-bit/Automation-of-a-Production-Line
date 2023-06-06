@@ -13,6 +13,8 @@ from modules import udp_comm_class, terminal_class, database_orders_class
 
 install(show_locals=True)
 
+# TODO update the MPS only when received a new order
+
 # TODO show the chosen supllier on the terminal
 
 # Constants
@@ -58,7 +60,7 @@ class ThreadedClient(threading.Thread):
 
 def process_orders():
     orders_obj = udp_comm_class.ProcessOrders(UDP_IP, UDP_PORT)
-    orders_obj.start()
+    orders_obj.start(mps)
 
 
 def pass_to_next_day():
@@ -167,19 +169,11 @@ def simulate_day_cycle():
         if current_time - start_time >= day_time:
             os.system('cls')
             day_index += 1
-            # if day_index >= len(mps.get_plans_list()):
-            #     print(f"halting Program... for {day_index} >= {len(mps.get_plans_list())}")
-            #     sys.exit(1)  # this is just a security may halt the program
             show_interface(day_index)
             start_time = current_time = 0
             next_time = start_time + send_message_after_x_seconds
             pass_to_next_day()
-            # terminal.show_new_plans(mps)
-            # terminal.change_day(day_index)
-            # mps.show_schedule()
             send_current_day = True
-            # mps.show_schedule()
-            # terminal.show_new_plans(mps)
         elif send_current_day is True:
             next_time = current_time + send_message_after_x_seconds
             message = mps.get_plans_list()[0]
@@ -190,7 +184,6 @@ def simulate_day_cycle():
 
 
 if __name__ == '__main__':
-    #terminal = terminal_class.ErpTerminal()
     p = multiprocessing.Process(target=process_orders)
     day_cycle = multiprocessing.Process(target=simulate_day_cycle)
     p.start()

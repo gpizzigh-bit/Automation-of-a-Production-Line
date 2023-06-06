@@ -208,8 +208,8 @@ class Scheduler:
             self.total_p1_piece_count = 0
             self.total_p2_piece_count = 0
             for order_number in range(0, len(self.order_list)):
-                if order_number != 0:
-                    self.schedule_order(order_number)
+                # if order_number != 0:
+                self.schedule_order(order_number)
             self.resolve_all_conflicts()
             # if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
             #     # Request a day to only deliver stored ready pieces
@@ -219,6 +219,23 @@ class Scheduler:
             self.request_lock_current_day = False
 
             return self.nested_result_list
+
+    def update_scheduler(self):
+        statistics_obj = Statistics()
+        # self.nested_result_list = []
+        # self.order_list = []
+        self._parse_data()
+        self.find_last_deadline()
+        self.find_total_time()
+        for order_number in range(0, len(self.order_list)):
+            statistics_obj.delete_statistics_row(self.order_list[order_number]['number'])
+            statistics_obj.add_statistics_Row(self.order_list[order_number]['number'], 0.00, 0.00, 0.00, 0.00, 0.00,
+                                              0.00)
+            self.schedule_order(order_number)
+
+        self.resolve_all_conflicts()
+        self.check_warehouse_status()
+        return self.nested_result_list
 
     def first_run(self):
         print("Starting Scheduler.", end='')
@@ -360,10 +377,7 @@ class Scheduler:
 
     def check_for_conflicts(self):
         for day_list in self.nested_result_list:
-            #print("\nday_lst:", day_list)
-            # print("\nnested_result_lst: ", self.nested_result_list)
             if len(day_list) > 4:
-                #print("True")
                 return True
         return False
 
@@ -371,7 +385,6 @@ class Scheduler:
         pos_in_loop = 0
         size_of_nested_list = len(self.nested_result_list)
         # identify conflicts
-        print(self.nested_result_list)
         while self.check_for_conflicts():
             pos_in_nested_list = 0
             for day_list in self.nested_result_list:
@@ -539,7 +552,8 @@ class Scheduler:
         self.current_day = self.nested_result_list[0].copy()
         for _ in range(0, self.count_execution):
             del self.nested_result_list[0]
-            del self.nested_purchasing_list[0]
+            if len(self.nested_purchasing_list) != 0:
+                del self.nested_purchasing_list[0]
 
     def show_schedule(self):
         day = 0

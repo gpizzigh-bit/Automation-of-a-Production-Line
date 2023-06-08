@@ -5,10 +5,12 @@ made by: Gabriel Pizzighini Salvador (gpizzigh-bit)
 
 import math
 import time
-
+import logging
 from .database_orders_class import Orders, Stock, Statistics
 
 from constants.local_constants import *
+
+logging.basicConfig(filename='../../PLA-App/docs/logs/scheduler.log', filemode='w', level=logging.DEBUG)
 
 
 def request_piece(workpiece, status):
@@ -332,7 +334,6 @@ class Scheduler:
             total_days = manufacturing_days
             time_to_complete = total_days * 60
 
-
         if order_type in ['P4', 'P7', 'P9', 'P5', 'P3']:
             piece_tree = find_in_tree("P2", order_type)
         elif order_type in ['P6', 'P8']:
@@ -346,14 +347,15 @@ class Scheduler:
                 for _ in range(0, int(order_total_size / (total_days / manufacturing_days))):
                     if len(piece_tree) == 1:
                         self.nested_result_list[order_deadline - days].append(
-                            request_piece(piece_tree[0], store_local))
+                            request_piece(piece_tree[0], STORE2DELIVER))
                     else:
                         self.nested_result_list[order_deadline - days].append(
                             request_piece(piece_tree[aux], store_local))
 
-                    if store_local == STORE2DELIVER:
-                        self.nested_result_list[order_deadline - days].append(
-                            request_piece_with_tag(piece_tree[aux], store_local, order_number))
+                    # this is a Bug [Deprecated]
+                    # if store_local == STORE2DELIVER:
+                    #     self.nested_result_list[order_deadline - days].append(
+                    #         request_piece_with_tag(piece_tree[aux], store_local, order_number))
                 if days == manufacturing_days - 1:
                     aux = 0  # reset index
                     # here we need to signal to store and deliver the piece
@@ -560,6 +562,15 @@ class Scheduler:
         for each_list in self.nested_result_list[:10]:
             print(f"day:{day} \n {each_list}")
             day += 1
+
+    def log_schedule(self, day):
+        logging.info(f"--------------------- Day Index: {day} ------------------------")
+        local_day = day
+        for each_list in self.nested_result_list:
+            logging.info(f"day:{local_day - day} \n {each_list}")
+            local_day += 1
+        logging.info("------------------------------------------------------------------------")
+        logging.info("\n")
 
     def show_day_ahead_purchasing_schedule(self, day_index, days_ahead):
         day = day_index

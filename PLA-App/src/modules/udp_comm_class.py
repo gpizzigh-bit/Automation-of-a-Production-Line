@@ -23,7 +23,7 @@ class SchedulerExe(threading.Thread):
         super().__init__()
         self.signal_execution = False
         self.scheduler = None
-        print("thread started.", end='')
+        #print("thread started.", end='')
 
     def run(self) -> None:
         while True:

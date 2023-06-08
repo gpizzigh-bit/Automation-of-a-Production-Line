@@ -26,6 +26,7 @@ stats = Statistics()
 stock = Stock()
 
 
+
 class ThreadedServer(threading.Thread):
     def __init__(self):
         # create the server object for communication
@@ -1266,7 +1267,7 @@ if __name__ == '__main__':
         if message is not None:
             if not message_received:
                 message_received = True
-                print(f"Got a new message from the ERP {message}")
+                print(f"Got a new message from the ERP {message} on day {day_cnt}")
                 day_cnt += 1
                 print()
                 if search_for_order_id(message):

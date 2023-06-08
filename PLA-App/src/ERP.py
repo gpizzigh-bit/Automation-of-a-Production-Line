@@ -30,6 +30,7 @@ HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 day_time = 5
 
 mps = MPS.Scheduler()
+stats = database_orders_class.Statistics()
 #terminal = terminal_class.ErpTerminal()
 day_index = 0
 
@@ -138,17 +139,17 @@ def show_interface(day_index):
     print()
 
     print(f"///////////// Purchasing Plan /////////////")
-    mps.show_day_ahead_purchasing_schedule(day_index, days_ahead)
+    mps.show_day_ahead_purchasing_schedule(day_index-1, days_ahead)
     print()
 
     print(f"///////////// Factory Statistics /////////////")
-    stats = database_orders_class.Statistics()
+    #stats = database_orders_class.Statistics()
     for order in pending_orders[:days_ahead]:
         order_dic = dict(subString.split(":") for subString in order.split(";"))
         print(f"order number:{order_dic['number']} Total cost: {stats.get_order_total_cost(remove_whitespace(order_dic['number']))}")
 
     print(f"///////////// MPS {days_ahead}-days ahead /////////////")
-    mps.show_day_ahead_schedule(day_index, days_ahead)
+    mps.show_day_ahead_schedule(day_index-1, days_ahead)
     print()
     print(
         f"-----------------------------------------------------------------------------------------------------------")
@@ -159,6 +160,7 @@ def simulate_day_cycle():
     comm_to_mes.start()
     day_index = 0
     mps.first_run()
+    mps.log_schedule(0)
     send_message_after_x_seconds = 1
     current_time = start_time = 0
     next_time = start_time + send_message_after_x_seconds
@@ -169,6 +171,7 @@ def simulate_day_cycle():
         if current_time - start_time >= day_time:
             os.system('cls')
             day_index += 1
+            mps.log_schedule(day_index)
             show_interface(day_index)
             start_time = current_time = 0
             next_time = start_time + send_message_after_x_seconds

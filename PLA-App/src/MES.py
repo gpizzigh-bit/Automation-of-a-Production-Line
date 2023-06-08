@@ -84,22 +84,36 @@ def tool_changer(machine, new_tool, old_tool):
 
     if machine == 1 and decision == "minus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_minus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.tool_ready"
     elif machine == 1 and decision == "plus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.cmd_R_plus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M1.tool_ready"
     elif machine == 2 and decision == "minus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_minus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.tool_ready"
     elif machine == 2 and decision == "plus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.cmd_R_plus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M2.tool_ready"
     elif machine == 3 and decision == "minus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_minus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.tool_ready"
     elif machine == 3 and decision == "plus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.cmd_R_plus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M3.tool_ready"
     elif machine == 4 and decision == "minus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_minus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.tool_ready"
     elif machine == 4 and decision == "plus":
         string = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.cmd_R_plus"
+        string2 = "ns=4;s=|var|CODESYS Control Win V3 x64.Application.Geral.M4.tool_ready"
 
     setting_a_variable_true(string)
+    time.sleep(4)
+    setting_a_variable_false(string)
+    while True:
+        ready = get_variable(string2)
+        if ready == True:
+            break
     machines_state[machine - 1] = new_tool
     print(f'changing from T{old_tool} to a T{new_tool} on machine {machine}')
 
@@ -1031,11 +1045,11 @@ def status_decision(c, p, todo):
 def show_terminal(requests, id, time, init):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
-    title = colored(title, "blue")
     print(title)
-    print('-----------------------------------------------------------------------')
+    print('-----------------------------------------------------------------------\n')
+    print(f'---------------------------------day {day_cnt}---------------------------------\n')
     produced = id
-    pending = 4 - produced
+    pending = len(requests) - produced
     workpiece_number = [0, 0, 0, 0]
     string1 = '               First Order:'
     string2 = '               Second Order:'
@@ -1043,45 +1057,78 @@ def show_terminal(requests, id, time, init):
     string4 = '               Fourth Order:'
     string5 = '         Status:'
     string6 = '        Status:'
-    if len(requests) == 1:
+    if requests[0]['status'] == 0:
         string = '                             RESTOCK DAY'
         stringg = '          pieces P1 and P2 are being stored in the warehouse'
         print(string)
         print(stringg)
-    elif len(requests) == 4:
+    else:
         string = '                  Number of produced pieces today:'
         print(f'{string} {produced}')
         string = '                     Number of pending pieces:'
         print(f'{string} {pending}\n')
         string = '                              Orders:'
         print(string)
-        for i in range(4):
+        for i in range(len(requests)):
             piece = requests[i]['workpiece']
             number = int(piece[1:])
             workpiece_number[i] = number
-        if id == 0:
-            if init == 1:
-                print(f'{string1} P{workpiece_number[0]}{string5} About to start')
-            elif init == 0:
-                print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
-            print(f'{string2} P{workpiece_number[1]}{string6} Waiting')
-            print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
-            print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
-        elif id == 1:
-            print(f'{string1} P{workpiece_number[0]}{string5} Done')
-            print(f'{string2} P{workpiece_number[1]}{string6} Making the piece')
-            print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
-            print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
-        elif id == 2:
-            print(f'{string1} P{workpiece_number[0]}{string5} Done')
-            print(f'{string2} P{workpiece_number[1]}{string6} Done')
-            print(f'{string3} P{workpiece_number[2]}{string5} Making the piece')
-            print(f'{string4} P{workpiece_number[3]} Waiting\n')
-        elif id == 3:
-            print(f'{string1} P{workpiece_number[0]}{string5} Done')
-            print(f'{string2} P{workpiece_number[1]}{string6} Done')
-            print(f'{string3} P{workpiece_number[2]}{string5} Done')
-            print(f'{string4} P{workpiece_number[3]}{string6} Making the piece\n')
+        if len(requests) == 4:
+            if id == 0:
+                if init == 1:
+                    print(f'{string1} P{workpiece_number[0]}{string5} About to start')
+                elif init == 0:
+                    print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
+                print(f'{string2} P{workpiece_number[1]}{string6} Waiting')
+                print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
+                print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
+            elif id == 1:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Making the piece')
+                print(f'{string3} P{workpiece_number[2]}{string5} Waiting')
+                print(f'{string4} P{workpiece_number[3]}{string6} Waiting\n')
+            elif id == 2:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Done')
+                print(f'{string3} P{workpiece_number[2]}{string5} Making the piece')
+                print(f'{string4} P{workpiece_number[3]} Waiting\n')
+            elif id == 3:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Done')
+                print(f'{string3} P{workpiece_number[2]}{string5} Done')
+                print(f'{string4} P{workpiece_number[3]}{string6} Making the piece\n')
+        elif len(requests) == 3:
+            if id == 0:
+                if init == 1:
+                    print(f'{string1} P{workpiece_number[0]}{string5} About to start')
+                elif init == 0:
+                    print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
+                print(f'{string2} P{workpiece_number[1]}{string6} Waiting')
+                print(f'{string3} P{workpiece_number[2]}{string5} Waiting\n')
+            elif id == 1:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Making the piece')
+                print(f'{string3} P{workpiece_number[2]}{string5} Waiting\n')
+            elif id == 2:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Done')
+                print(f'{string3} P{workpiece_number[2]}{string5} Making the piece\n')
+        elif len(requests) == 2:
+            if id == 0:
+                if init == 1:
+                    print(f'{string1} P{workpiece_number[0]}{string5} About to start')
+                elif init == 0:
+                    print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
+                print(f'{string2} P{workpiece_number[1]}{string6} Waiting\n')
+            elif id == 1:
+                print(f'{string1} P{workpiece_number[0]}{string5} Done')
+                print(f'{string2} P{workpiece_number[1]}{string6} Making the piece\n')
+        elif len(requests) == 1:
+            if id == 0:
+                if init == 1:
+                    print(f'{string1} P{workpiece_number[0]}{string5} About to start')
+                elif init == 0:
+                    print(f'{string1} P{workpiece_number[0]}{string5} Making the piece')
         string = '           Time passed since production started:'
         print(f'{string} {time} segundos')
 
@@ -1091,9 +1138,9 @@ def show_terminal(requests, id, time, init):
 def show_terminal_end(requests, time):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
-    title = colored(title, "blue")
     print(title)
-    print('-----------------------------------------------------------------------')
+    print('-----------------------------------------------------------------------\n')
+    print(f'---------------------------------day {day_cnt}---------------------------------\n')
     produced = 4
     pending = 0
     workpiece_number = [0, 0, 0, 0]
@@ -1103,46 +1150,48 @@ def show_terminal_end(requests, time):
     string4 = '               Fourth Order:'
     string5 = '         Status:'
     string6 = '        Status:'
-    if len(requests) == 1:
+    if requests[0]['status'] == 0:
         string = '                           RESTOCK FINISHED'
         stringg = '            pieces P1 and P2 are now stored in the warehouse'
         print(string)
         print(stringg)
-    elif len(requests) == 4:
+    else:
         string = '                  Number of produced pieces today:'
         print(f'{string} {produced}')
         string = '                     Number of pending pieces:'
         print(f'{string} {pending}\n')
         string = '                              Orders:'
         print(string)
-        for i in range(4):
+        for i in range(len(requests)):
             piece = requests[i]['workpiece']
             number = int(piece[1:])
             workpiece_number[i] = number
-
-        print(f'{string1} P{workpiece_number[0]}{string5} Done')
-        print(f'{string2} P{workpiece_number[1]}{string6} Done')
-        print(f'{string3} P{workpiece_number[2]}{string5} Done')
-        print(f'{string4} P{workpiece_number[3]}{string6} Done\n')
-        string = '           Time passed since production started:'
+        if len(requests) == 1:
+            print(f'{string1} P{workpiece_number[0]}{string5} Done\n')
+        elif len(requests) == 2:
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Done\n')
+        elif len(requests) == 3:
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Done')
+            print(f'{string3} P{workpiece_number[2]}{string5} Done\n')
+        elif len(requests) == 4:
+            print(f'{string1} P{workpiece_number[0]}{string5} Done')
+            print(f'{string2} P{workpiece_number[1]}{string6} Done')
+            print(f'{string3} P{workpiece_number[2]}{string5} Done')
+            print(f'{string4} P{workpiece_number[3]}{string6} Done\n')
+        string = '                   Total production time:'
         print(f'{string} {time} segundos')
 
     print('-----------------------------------------------------------------------')
 
-
 def show_terminal_shipping(p, n):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
-    title = colored(title, "blue")
     print(title)
-    print('-----------------------------------------------------------------------')
-    produced = 4
-    pending = 0
+    print('-----------------------------------------------------------------------\n')
+    print(f'---------------------------------day {day_cnt}---------------------------------\n')
 
-    string = '                  Number of produced pieces today:'
-    print(f'{string} {produced}')
-    string = '                     Number of pending pieces:'
-    print(f'{string} {pending}\n')
     n = str(n)
     p = str(p)
     string = '                   Delivering ' + n
@@ -1150,7 +1199,6 @@ def show_terminal_shipping(p, n):
     print(f'{string}\n')
 
     print('-----------------------------------------------------------------------')
-
 
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
@@ -1248,12 +1296,12 @@ if __name__ == '__main__':
 
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
-    # Connect to server
-    # url = "opc.tcp://localhost:4840"
-    # client = Client(url)
-    # client.connect()
-    # c=[0,0,0,0,0,0,0] #peças em armazem
-    # maquina=[0,0]
+    #Connect to server
+    url = "opc.tcp://localhost:4840"
+    client = Client(url)
+    client.connect()
+    c=[0,0,0,0,0,0,0] #peças em armazem
+    maquina=[0,0]
 
     stock.update_Stock_P1(20)
     stock.update_Stock_P2(0)
@@ -1280,6 +1328,42 @@ if __name__ == '__main__':
                     # update the arrival date for all orders
                     update_arrival_date_for_all_orders(day_cnt)
                     # TODO in the future make this dynamic...
+                requests = message
+                size = len(requests)
+                id = 0
+                first_iteration = 1
+                if requests is not None:
+                    show_terminal(requests, id, 0, 1)
+                a = time.time()
+
+                for id in range(size):
+                    show_terminal(requests, id, 0, 0)
+                    string = requests[id]['workpiece']
+                    todo = requests[id]['status']
+                    p1_quantity = requests[id]['p1_amount']
+                    p2_quantity = requests[id]['p2_amount']
+
+                    if id == (size - 1):
+                        next_string = '0'
+                    else:
+                        next_string = requests[id + 1]['workpiece']
+
+                    if todo != '0':
+                        aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1],
+                                               client)
+                        maquina = aux
+                        machines_state[maquina[0] - 1] = get_tool(string)
+                        first_iteration = 0
+                        print(f'about to make a piece on machine {maquina[0]}')
+                    else:
+                        maquina[0] = 0
+                        print('about to restock')
+                    switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
+                    print('piece done')
+                    b = time.time()
+                    b = b - a
+                    show_terminal_end(requests, b)
+                    print("new day")
         else:
             message_received = False
 '''

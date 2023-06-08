@@ -27,7 +27,7 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 
-day_time = 5
+day_time = 20
 
 mps = MPS.Scheduler()
 stats = database_orders_class.Statistics()
@@ -66,7 +66,8 @@ def process_orders():
 
 def pass_to_next_day():
     mps.request_lock_current_day = True
-    mps.run()
+    mps.count_execution += 1
+    mps.lock_current_day()
 
 
 def calculate_cost_for_each_order(order):
@@ -139,17 +140,16 @@ def show_interface(day_index):
     print()
 
     print(f"///////////// Purchasing Plan /////////////")
-    mps.show_day_ahead_purchasing_schedule(day_index-1, days_ahead)
+    mps.show_day_ahead_purchasing_schedule(day_index, days_ahead)
     print()
 
     print(f"///////////// Factory Statistics /////////////")
-    #stats = database_orders_class.Statistics()
     for order in pending_orders[:days_ahead]:
         order_dic = dict(subString.split(":") for subString in order.split(";"))
         print(f"order number:{order_dic['number']} Total cost: {stats.get_order_total_cost(remove_whitespace(order_dic['number']))}")
 
     print(f"///////////// MPS {days_ahead}-days ahead /////////////")
-    mps.show_day_ahead_schedule(day_index-1, days_ahead)
+    mps.show_day_ahead_schedule(day_index, days_ahead)
     print()
     print(
         f"-----------------------------------------------------------------------------------------------------------")
@@ -161,27 +161,27 @@ def simulate_day_cycle():
     day_index = 0
     mps.first_run()
     mps.log_schedule(0)
-    send_message_after_x_seconds = 1
     current_time = start_time = 0
-    next_time = start_time + send_message_after_x_seconds
     send_current_day = True
+    show_interface(day_index)
     while current_time - start_time <= day_time:
         time.sleep(1)  # current time is equal to 1s
         current_time += 1
         if current_time - start_time >= day_time:
             os.system('cls')
             day_index += 1
+            mps.set_current_day_index(day_index)
             mps.log_schedule(day_index)
+            pass_to_next_day()
             show_interface(day_index)
             start_time = current_time = 0
-            next_time = start_time + send_message_after_x_seconds
-            pass_to_next_day()
             send_current_day = True
         elif send_current_day is True:
-            next_time = current_time + send_message_after_x_seconds
-            message = mps.get_plans_list()[0]
+            message = mps.current_day
             comm_to_mes.set_msg(message)
             send_current_day = False
+            if mps.get_restock_predicted_day() == day_index:
+                mps.unlock_for_restock()
         elif comm_to_mes.get_feedback_msg() == FEEDBACK_MSG:
             comm_to_mes.set_msg(None)
 

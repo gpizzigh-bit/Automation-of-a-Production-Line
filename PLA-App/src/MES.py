@@ -1255,8 +1255,8 @@ if __name__ == '__main__':
     # c=[0,0,0,0,0,0,0] #peças em armazem
     # maquina=[0,0]
 
-    stock.update_Stock_P1(10)
-    stock.update_Stock_P2(10)
+    stock.update_Stock_P1(20)
+    stock.update_Stock_P2(0)
 
     old_msg = comm_to_erp.get_message()
     day_cnt = 0

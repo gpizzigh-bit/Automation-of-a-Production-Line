@@ -55,6 +55,7 @@ class Database():
         query = f"UPDATE {table_name} SET {new_values} WHERE {condition};"
         self.cur.execute(query)
         self.conn.commit()
+        return query
 
     def read_Values(self, table_name, variables, condition):
         query = f"SELECT {variables} FROM {table_name} WHERE {condition};"
@@ -80,13 +81,14 @@ class Database():
         self.cur.execute(query)
         self.conn.commit()
         return self.cur.fetchone()[0]
-    
-    def get_column_values(self,table_name,column):
-        query=f"SELECT {column} FROM {table_name};"
+
+    def get_column_values(self, table_name, column):
+        query = f"SELECT {column} FROM {table_name};"
         self.cur.execute(query)
         self.conn.commit()
         column_values = [row[0] for row in self.cur.fetchall()]
         return column_values
+
 
 class Concluded(Database):
 
@@ -190,7 +192,8 @@ class Orders(Database):
 
     def read_Order_Number_X(self, order_number):
         col_names = ["number", "workpiece", "quantity", "duedate", "latepen", "earlypen", "clientid"]
-        rows = self.read_Values("orders", "number,workpiece,quantity,duedate,latepen,earlypen,clientid",f"number='{order_number}'")
+        rows = self.read_Values("orders", "number,workpiece,quantity,duedate,latepen,earlypen,clientid",
+                                f"number='{order_number}'")
         result_list = []
         for row in rows:
             row_strings = [f"{col_names[i]}: {str(row[i])}" for i in range(len(col_names))]
@@ -327,13 +330,13 @@ class Stock(Database):
 
 class Statistics(Database):
 
-    #Statistics Table subclass
+    # Statistics Table subclass
 
     def add_statistics_Row(self, number, dc, pc, ad, dd, tc, rc):
         self.insert_Row("statistics", f"'{number}','{dc}','{pc}','{ad}','{dd}','{tc}','{rc}'")
 
     def update_dc(self, number, dc):
-        self.update_Value("statistics", f"number=' {number}'", f"dc='{dc}'")
+        self.update_Value("statistics", f"number='{number}'", f"dc='{dc}'")
 
     def update_pc(self, number, pc):
         self.update_Value("statistics", f"number=' {number}'", f"pc='{pc}'")
@@ -345,7 +348,7 @@ class Statistics(Database):
         self.update_Value("statistics", f"number=' {number}'", f"dd='{dd}'")
 
     def update_rc(self, number, rc):
-        self.update_Value("statistics", f"number=' {number}'", f"rc='{rc}'")
+        self.update_Value("statistics", f"number='{number}'", f"rc='{rc}'")
 
     def update_tc(self, number, tc):
         self.update_Value("statistics", f"number=' {number}'", f"tc='{tc}'")
@@ -401,14 +404,15 @@ class Statistics(Database):
     def get_order_total_cost(self, number):
         self.calculate_formulas(number)
         return self.read_tc(number)
-    
-    def read_All_Order_Numbers(self):
-        return self.get_column_values("statistics","number")
 
-    def update_All_RC(self,rc):
-        numbers=self.read_All_Order_Numbers
+    def read_All_Order_Numbers(self):
+        return self.get_column_values("statistics", "number")
+
+    def update_All_RC(self, rc):
+        numbers = self.read_All_Order_Numbers()
         for i in range(len(numbers)):
-            self.update_rc(numbers[i],rc)
+            self.update_rc(numbers[i], rc)
+
 
 class PiecestoPurchase(Database):
     def add_Piece_To_Purchase(self, piece, quantity, date):

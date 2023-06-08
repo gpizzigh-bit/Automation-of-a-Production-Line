@@ -12,6 +12,8 @@ from constants.local_constants import *
 
 logging.basicConfig(filename='../../PLA-App/docs/logs/scheduler.log', filemode='w', level=logging.DEBUG)
 
+stats = Statistics()
+
 
 def request_piece(workpiece, status):
     return {"workpiece": workpiece, "status": status, "p1_amount": 0, "p2_amount": 0}
@@ -98,8 +100,8 @@ def find_supplier(piece_type: str, quantity: int, delivery_time: int):
                        info[piece_type]['delivery_time'] <= delivery_time and info[piece_type][
                            'min_order_quantity'] <= quantity}
 
-    if valid_suppliers is None:
-        return supplier['C']
+    if valid_suppliers is None or quantity <= 4:
+        return 'C'
 
     # Find the supplier with the lowest cost per piece
     best_supplier = min(valid_suppliers, key=lambda x: valid_suppliers[x][piece_type]['price'])
@@ -109,7 +111,13 @@ def find_supplier(piece_type: str, quantity: int, delivery_time: int):
 
 def restock_shift_list(nested_list, index, quantity, day_objective):
     for i in range(add_one_if_float(quantity)):
-        nested_list.insert(index + i, [day_objective])
+        if index >= len(nested_list):
+            nested_list.append([day_objective])
+        if nested_list[index]:  # is not empty
+            nested_list.insert(index + i, [day_objective])
+        else:
+            # list is empty, just add the objective
+            nested_list[index + i] = [day_objective]
     return nested_list
 
 
@@ -128,6 +136,14 @@ def count_empty_days(nested_list):
         else:
             break
     return count
+
+
+def find_first_empty_day(nested_list):
+    for index, inner_list in enumerate(nested_list):
+        if not inner_list:
+            return index
+        else:
+            continue
 
 
 def create_empty_nested_list(nested_list):
@@ -178,13 +194,25 @@ def update_all_orders_arrival_day(arraival_day):
 #     result = []
 
 
+def check_for_warehouse_space(amount_of_p1, amount_of_p2):
+    if amount_of_p1 + amount_of_p2 <= RAW_PIECES_THRESHOLD:
+        return True
+    else:
+        return False
+
+
 class Scheduler:
 
     def __init__(self):
+        self.signal_to_lock_restock = False
+        self.restock_predicted_day = None
+        self.current_amount_of_p2 = None
+        self.current_amount_of_p1 = None
         self.amount_of_p2_to_restock = None
         self.amount_of_p1_to_restock = None
         self.count_execution = 0
         self.current_day = None
+        self.current_day_index = 0
         self.order_dic = None
         self.order_list = []
         self.nested_result_list = []
@@ -202,8 +230,8 @@ class Scheduler:
         if self.request_lock_current_day:
             self.count_execution += 1
             # run the algorithm without considering the first day
-            self.nested_result_list = []
-            self.order_list = []
+            # self.nested_result_list = []
+            # self.order_list = []
             self._parse_data()
             self.find_last_deadline()
             self.find_total_time()
@@ -216,19 +244,23 @@ class Scheduler:
             # if self.count_stored2deliver_pieces() >= STORE2DELIVER_WAREHOUSE_LIMIT:  # 4
             #     # Request a day to only deliver stored ready pieces
             #     self.request_delivery_day()
-            self.check_warehouse_status()
             self.lock_current_day()
+            self.check_warehouse_status()
             self.request_lock_current_day = False
 
             return self.nested_result_list
 
     def update_scheduler(self):
         statistics_obj = Statistics()
+        self.nested_result_list = []
+        self.order_list = []
         # self.nested_result_list = []
         # self.order_list = []
         self._parse_data()
         self.find_last_deadline()
         self.find_total_time()
+        self.total_p1_piece_count = 0
+        self.total_p2_piece_count = 0
         for order_number in range(0, len(self.order_list)):
             statistics_obj.delete_statistics_row(self.order_list[order_number]['number'])
             statistics_obj.add_statistics_Row(self.order_list[order_number]['number'], 0.00, 0.00, 0.00, 0.00, 0.00,
@@ -432,130 +464,358 @@ class Scheduler:
         self.nested_result_list = result
 
     def check_warehouse_status(self):
-        # connect to the database of the warehouse
-        warehouse = Stock()
-        amount_of_p1 = warehouse.read_Stock_P1()
-        amount_of_p2 = warehouse.read_Stock_P2()
+        if self.signal_to_lock_restock is False:
+            warehouse = Stock()
+            amount_of_p1 = warehouse.read_Stock_P1()
+            amount_of_p2 = warehouse.read_Stock_P2()
+            self.current_amount_of_p1 = warehouse.read_Stock_P1()
+            self.current_amount_of_p2 = warehouse.read_Stock_P2()
+            # check if I have the needed pieces on the warehouse
+            if amount_of_p1 <= self.total_p1_piece_count and amount_of_p2 <= self.total_p2_piece_count:
+                # now for both pieces
+                total_p1_to_buy = self.total_p1_piece_count - amount_of_p1
+                total_p2_to_buy = self.total_p2_piece_count - amount_of_p2
+
+                if total_p1_to_buy <= RESTOCK_THRESHOLD['P1'] and \
+                        check_for_warehouse_space(amount_of_p1, amount_of_p2) and \
+                        total_p2_to_buy <= RESTOCK_THRESHOLD['P2']:
+                    self.purchase_p1_and_p2(total_p1_to_buy, total_p2_to_buy)
+                    self.signal_to_lock_restock = True
+
+                if total_p1_to_buy > RESTOCK_THRESHOLD['P1'] or total_p2_to_buy > RESTOCK_THRESHOLD['P2'] \
+                        and check_for_warehouse_space(amount_of_p1, amount_of_p2):
+                    # by to restock to Threshold
+                    self.purchase_p1_and_p2(RESTOCK_THRESHOLD['P1'], RESTOCK_THRESHOLD['P2'])
+                    self.signal_to_lock_restock = True
+
+            elif amount_of_p1 <= self.total_p1_piece_count:
+                # I need to by P1s
+                # How much?
+                total_p1_to_buy = self.total_p1_piece_count - amount_of_p1
+                # do I respect the warehouse P1 limit?
+                if total_p1_to_buy <= RESTOCK_THRESHOLD['P1'] and check_for_warehouse_space(amount_of_p1, amount_of_p2):
+                    self.purchase_p1(total_p1_to_buy)
+                    self.signal_to_lock_restock = True
+
+            elif amount_of_p2 <= self.total_p2_piece_count:
+                # same as above but for P2
+                total_p2_to_buy = self.total_p2_piece_count - amount_of_p2
+                if total_p2_to_buy <= RESTOCK_THRESHOLD['P2'] and check_for_warehouse_space(amount_of_p1, amount_of_p2):
+                    self.purchase_p2(total_p2_to_buy)
+                    self.signal_to_lock_restock = True
+                if total_p2_to_buy > RESTOCK_THRESHOLD['P2'] and check_for_warehouse_space(amount_of_p1, amount_of_p2):
+                    self.purchase_p2(RESTOCK_THRESHOLD['P2'])
+                    self.signal_to_lock_restock = True
+
+    def purchase_p1_and_p2(self, amount_of_p1_to_buy, amount_of_p2_to_buy):
         self.nested_purchasing_list = create_empty_nested_list(self.nested_result_list)
+        free_days = count_empty_days(self.nested_result_list)
+        needed_days = max(amount_of_p1_to_buy / P1_RESTOCK_LIMIT_BY_DAY,
+                          amount_of_p2_to_buy / P2_RESTOCK_LIMIT_BY_DAY)
+        needed_days = add_one_if_float(needed_days)  # add one day of not int
+        self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1_to_buy)
+        self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2_to_buy)
+        # find a supplier for the difference of the needed pieces to reach the threshold
+        if free_days >= 1:
+            self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, needed_days)
+            self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, needed_days)
+        else:
+            self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, 1)
+            self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, 1)
 
-        if amount_of_p1 == 0 and amount_of_p2 == 0:
-            # Fresh factory status
-            # count available days before firsts order
-            needed_days = count_empty_days(self.nested_result_list)
-            self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
-            self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
-            self.p1_supplier = find_supplier("P1", (RESTOCK_THRESHOLD["P1"] - amount_of_p1), needed_days)
-            self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"] - amount_of_p2), needed_days)
-            self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
-            self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+        self.total_cost_of_p1 = amount_of_p1_to_buy * suppliers[self.p1_supplier]['P1']['price']
+        self.total_cost_of_p2 = amount_of_p2_to_buy * suppliers[self.p2_supplier]['P2']['price']
+        desired__p1_index_day = self.current_day_index
+        desired__p2_index_day = self.current_day_index
+        desired_index_day = self.current_day_index
+        max_of_supplier = max(suppliers[self.p1_supplier]['P1']['delivery_time'],
+                              suppliers[self.p2_supplier]['P2']['delivery_time'])
+        if free_days >= 1:
+            desired_index_day = find_first_empty_day(self.nested_result_list)
+            desired__p1_index_day = find_first_empty_day(self.nested_result_list)
+            desired__p2_index_day = find_first_empty_day(self.nested_result_list)
 
-            self.nested_purchasing_list[suppliers[self.p1_supplier]['P1']['delivery_time']].append()
+        if amount_of_p1_to_buy <= suppliers[self.p1_supplier]['P1']['min_order_quantity']:
+            minimum_amount = suppliers[self.p1_supplier]['P1']['min_order_quantity']
+            self.total_cost_of_p1 = amount_of_p1_to_buy * minimum_amount * suppliers[self.p1_supplier]['P1']['price']
+            restock_shift_list(self.nested_result_list, desired__p1_index_day + max_of_supplier, needed_days,
+                               request_restock(P1_AND_P2_RESTOCK_STR, '0',
+                                               amount_of_p1_to_buy * minimum_amount - self.current_amount_of_p1,
+                                               amount_of_p2_to_buy - self.current_amount_of_p2))
 
-            total_index = 0
-            for index in range(0, needed_days - 1):
-                self.nested_result_list[index] = request_restock(P1_AND_P2_RESTOCK_STR, '0',
-                                                                 self.amount_of_p1_to_restock,
-                                                                 self.amount_of_p2_to_restock)
-                total_index += 1
+            self.nested_purchasing_list[
+                desired__p1_index_day].append(
+                f"Buy from {self.p1_supplier} {amount_of_p1_to_buy * minimum_amount} P1s")
 
-            # update_all_orders_arrival_day(total_index)
+            self.nested_purchasing_list[
+                desired__p2_index_day].append(
+                f"Buy form {self.p2_supplier} {amount_of_p2_to_buy} P2s")
 
-            self.nested_purchasing_list[total_index - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
-                f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
+            stats.update_All_RC(suppliers[self.p1_supplier]['P1']['price'])
 
-            self.nested_purchasing_list[total_index - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
-                f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+        elif amount_of_p2_to_buy <= suppliers[self.p2_supplier]['P2']['min_order_quantity']:
+            minimum_amount = suppliers[self.p2_supplier]['P2']['min_order_quantity']
+            self.total_cost_of_p2 = amount_of_p2_to_buy * minimum_amount * suppliers[self.p2_supplier]['P2']['price']
 
-            # restock_shift_list(self.nested_result_list, 0, needed_days,
-            #                    request_piece("P1 and P2 restock", ''))
-        """if amount_of_p2 == 0:
-            needed_days = count_empty_days(self.nested_result_list)
-            self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"]), needed_days)
-            self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
-            self.nested_purchasing_list[suppliers[self.p1_supplier]['P1']['delivery_time']].append()
-            desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
+            restock_shift_list(self.nested_result_list, desired__p2_index_day + max_of_supplier, needed_days,
+                               request_restock(P1_AND_P2_RESTOCK_STR, '0', amount_of_p1_to_buy,
+                                               amount_of_p2_to_buy + minimum_amount))
+
+            self.nested_purchasing_list[
+                desired__p1_index_day].append(
+                f"Buy from {self.p1_supplier} {amount_of_p1_to_buy} P1s")
+
+            self.nested_purchasing_list[
+                desired__p2_index_day].append(
+                f"Buy form {self.p2_supplier} {amount_of_p2_to_buy + minimum_amount} P2s")
+
+            stats.update_All_RC(suppliers[self.p2_supplier]['P2']['price'])
+
+        else:
+            # both orders are normal
             restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
-                               request_restock(P2_RESTOCK_STR, '0', 0, self.amount_of_p2_to_restock))
-
-            # need to implement for these cases too
-            self.nested_purchasing_list[
-                desired_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
-                f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")"""
-
-        # compare to the total requested by the pending orders
-        if amount_of_p1 < RESTOCK_THRESHOLD["P1"] and amount_of_p2 < RESTOCK_THRESHOLD["P2"]:
-            # if bellow limit of the threshold request a restocking day
-            # calculate number of days to restock
-            needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY + \
-                          (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
-
-            needed_days = add_one_if_float(needed_days)  # add one day of not int
-            self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
-            self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
-            # find a supplier for the difference of the needed pieces to reach the threshold
-            self.p1_supplier = find_supplier("P1", (RESTOCK_THRESHOLD["P1"] - amount_of_p1), needed_days)
-            self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"] - amount_of_p2), needed_days)
-
-            self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
-            self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
-            desired__p1_index_day = needed_days * suppliers[self.p1_supplier]['P1']['delivery_time']
-            desired__p2_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
-            desired_index_day = needed_days * max(suppliers[self.p1_supplier]['P1']['delivery_time'],
-                                                  suppliers[self.p2_supplier]['P2']['delivery_time'])
-
-            # update_all_orders_arrival_day(desired_index_day)
+                               request_restock(P1_AND_P2_RESTOCK_STR, '0',
+                                               amount_of_p1_to_buy - self.current_amount_of_p1,
+                                               amount_of_p2_to_buy - self.current_amount_of_p2))
 
             self.nested_purchasing_list[
-                desired__p1_index_day - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
-                f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
+                desired__p1_index_day].append(
+                f"Buy from {self.p1_supplier} {amount_of_p1_to_buy} P1s")
 
             self.nested_purchasing_list[
-                desired__p2_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
-                f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+                desired__p2_index_day].append(
+                f"Buy form {self.p2_supplier} {amount_of_p2_to_buy} P2s")
 
-            restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
-                               request_restock(P1_AND_P2_RESTOCK_STR, '0', self.amount_of_p1_to_restock,
-                                               self.amount_of_p2_to_restock))
+            stats.update_All_RC(max(suppliers[self.p1_supplier]['P1']['price'],
+                                    suppliers[self.p2_supplier]['P2']['price']))
 
-        elif amount_of_p1 < RESTOCK_THRESHOLD["P1"]:
-            needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY
-            needed_days = add_one_if_float(needed_days)  # add one day of not int
-            self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
-            self.p1_supplier = find_supplier("P1", RESTOCK_THRESHOLD["P1"] - amount_of_p1, needed_days)
-            self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
-            desired_index_day = needed_days * suppliers[self.p1_supplier]['P1']['delivery_time']
-            restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
-                               request_restock(P1_RESTOCK_STR, '0', self.amount_of_p1_to_restock, 0))
+        self.restock_predicted_day = desired_index_day
+
+    def purchase_p1(self, amount_of_p1_to_buy):
+        self.nested_purchasing_list = create_empty_nested_list(self.nested_result_list)
+        free_days = count_empty_days(self.nested_result_list)
+        needed_days = amount_of_p1_to_buy / P1_RESTOCK_LIMIT_BY_DAY
+        needed_days = add_one_if_float(needed_days)  # add one day of not int
+        if free_days >= 1:
+            print(f"amount of {amount_of_p1_to_buy} in {free_days} days")
+            self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, free_days)
+        else:
+            self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, 1)
+        desired_index_day = self.current_day_index
+        if amount_of_p1_to_buy <= suppliers[self.p1_supplier]['P1']['min_order_quantity']:
+            if free_days >= 1:
+                desired__p2_index_day = find_first_empty_day(self.nested_result_list)
+            minimum_amount = suppliers[self.p1_supplier]['P1']['min_order_quantity']
+            self.total_cost_of_p1 = amount_of_p1_to_buy * minimum_amount * suppliers[self.p1_supplier]['P1']['price']
+            restock_shift_list(self.nested_result_list, desired_index_day + suppliers[self.p1_supplier]['P1']['delivery_time'], needed_days,
+                               request_restock(P1_RESTOCK_STR, '0', amount_of_p1_to_buy + minimum_amount, 0))
             self.nested_purchasing_list[
-                desired_index_day - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
-                f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
-
-            # need to implement for these cases too
-
-        # now for piece p2
-        elif amount_of_p2 < RESTOCK_THRESHOLD["P2"]:
-            needed_days = (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
-            needed_days = add_one_if_float(needed_days)  # add one day of not int
-            self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
-            self.p2_supplier = find_supplier("P2", RESTOCK_THRESHOLD["P2"] - amount_of_p2, needed_days)
-            self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
-            desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
-            restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
-                               request_restock(P2_RESTOCK_STR, '0', 0, self.amount_of_p2_to_restock))
-
-            # need to implement for these cases too
+                desired_index_day].append(
+                f"Buy from {self.p1_supplier} {amount_of_p1_to_buy * minimum_amount} P1s")
+        else:
+            if free_days >= 1:
+                desired__p2_index_day = find_first_empty_day(self.nested_result_list)
+            self.total_cost_of_p1 = amount_of_p1_to_buy * suppliers[self.p1_supplier]['P1']['price']
+            restock_shift_list(self.nested_result_list, desired_index_day+suppliers[self.p1_supplier]['P1']['delivery_time'], needed_days,
+                               request_restock(P1_RESTOCK_STR, '0', amount_of_p1_to_buy-self.current_amount_of_p1, 0))
 
             self.nested_purchasing_list[
-                desired_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
-                f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+                desired_index_day].append(
+                f"Buy from {self.p1_supplier} {amount_of_p1_to_buy} P1s")
+
+        stats.update_All_RC(suppliers[self.p1_supplier]['P1']['price'])
+        self.restock_predicted_day = desired_index_day
+
+    def purchase_p2(self, amount_of_p2_to_buy):
+        self.nested_purchasing_list = create_empty_nested_list(self.nested_result_list)
+        free_days = count_empty_days(self.nested_result_list)
+        needed_days = amount_of_p2_to_buy / P2_RESTOCK_LIMIT_BY_DAY
+        needed_days = add_one_if_float(needed_days)  # add one day of not int
+        if free_days >= 1:
+            self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, free_days)
+        else:
+            self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, 1)
+        desired__p2_index_day = self.current_day_index  # try always to be tomorrow
+        if amount_of_p2_to_buy <= suppliers[self.p2_supplier]['P2']['min_order_quantity']:
+            if free_days >= 1:
+                desired__p2_index_day = find_first_empty_day(self.nested_result_list)
+            minimum_amount = suppliers[self.p2_supplier]['P2']['min_order_quantity']
+            self.total_cost_of_p2 = amount_of_p2_to_buy * minimum_amount * suppliers[self.p2_supplier]['P1']['price']
+            # desired_index_day = needed_days + suppliers[self.p2_supplier]['P2']['delivery_time']
+            restock_shift_list(self.nested_result_list,
+                               desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time'],
+                               needed_days,
+                               request_restock(P2_RESTOCK_STR, '0', 0, amount_of_p2_to_buy + minimum_amount))
+
+            self.nested_purchasing_list[
+                desired__p2_index_day].append(
+                f"Buy from {self.p2_supplier} {amount_of_p2_to_buy + minimum_amount} P2s")
+
+        else:
+            if free_days >= 1:
+                desired__p2_index_day = find_first_empty_day(self.nested_result_list)
+            self.total_cost_of_p2 = amount_of_p2_to_buy * suppliers[self.p2_supplier]['P2']['price']
+            restock_shift_list(self.nested_result_list,
+                               desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time'], needed_days,
+                               request_restock(P2_RESTOCK_STR, '0', 0, amount_of_p2_to_buy - self.current_amount_of_p2))
+
+            self.nested_purchasing_list[
+                desired__p2_index_day].append(
+                f"Buy from {self.p2_supplier} {amount_of_p2_to_buy} P2s")
+
+        stats.update_All_RC(suppliers[self.p2_supplier]['P2']['price'])
+        self.restock_predicted_day = desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time']
+
+    def unlock_for_restock(self):
+        self.signal_to_lock_restock = False
+
+    def get_restock_predicted_day(self):
+        return self.restock_predicted_day
+
+    # def check_warehouse_status(self):
+    #     # connect to the database of the warehouse
+    #     warehouse = Stock()
+    #     stats = Statistics()
+    #     amount_of_p1 = warehouse.read_Stock_P1()
+    #     amount_of_p2 = warehouse.read_Stock_P2()
+    #     print(f"Total P1 : {self.total_p1_piece_count}\nTotal P2: {self.total_p2_piece_count}")
+    #     self.nested_purchasing_list = create_empty_nested_list(self.nested_result_list)
+    #     print(self.check_for_warehouse_space(amount_of_p1, amount_of_p2))
+    #
+    #     if amount_of_p1 == 0 and amount_of_p2 == 0 and self.check_for_warehouse_space(amount_of_p1, amount_of_p2):
+    #         # Fresh factory status
+    #         # count available days before firsts order
+    #         needed_days = count_empty_days(self.nested_result_list)
+    #         self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
+    #         self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
+    #         self.p1_supplier = find_supplier("P1", (RESTOCK_THRESHOLD["P1"] - amount_of_p1), needed_days)
+    #         self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"] - amount_of_p2), needed_days)
+    #         self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
+    #         self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+    #
+    #         self.nested_purchasing_list[suppliers[self.p1_supplier]['P1']['delivery_time']].append()
+    #
+    #         total_index = 0
+    #         for index in range(0, needed_days - 1):
+    #             self.nested_result_list[index] = request_restock(P1_AND_P2_RESTOCK_STR, '0',
+    #                                                              self.amount_of_p1_to_restock,
+    #                                                              self.amount_of_p2_to_restock)
+    #             total_index += 1
+    #
+    #         # update_all_orders_arrival_day(total_index)
+    #
+    #         self.nested_purchasing_list[total_index - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
+    #             f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
+    #
+    #         self.nested_purchasing_list[total_index - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
+    #             f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+    #
+    #         stats.update_All_RC(suppliers[self.p2_supplier]['P1']['price'])
+    #
+    #         # restock_shift_list(self.nested_result_list, 0, needed_days,
+    #         #                    request_piece("P1 and P2 restock", ''))
+    #     """if amount_of_p2 == 0:
+    #         needed_days = count_empty_days(self.nested_result_list)
+    #         self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"]), needed_days)
+    #         self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+    #         self.nested_purchasing_list[suppliers[self.p1_supplier]['P1']['delivery_time']].append()
+    #         desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
+    #         restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+    #                            request_restock(P2_RESTOCK_STR, '0', 0, self.amount_of_p2_to_restock))
+    #
+    #         # need to implement for these cases too
+    #         self.nested_purchasing_list[
+    #             desired_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
+    #             f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")"""
+    #
+    #     # compare to the total requested by the pending orders
+    # TODO     if amount_of_p1 < RESTOCK_THRESHOLD["P1"] and \
+    #             amount_of_p2 < RESTOCK_THRESHOLD["P2"] and \
+    #             self.check_for_warehouse_space(self, amount_of_p1, amount_of_p2):
+    #         # if bellow limit of the threshold request a restocking day
+    #         # calculate number of days to restock
+    #         needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY + \
+    #                       (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
+    #
+    #         needed_days = add_one_if_float(needed_days)  # add one day of not int
+    #         self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
+    #         self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
+    #         # find a supplier for the difference of the needed pieces to reach the threshold
+    #         self.p1_supplier = find_supplier("P1", (RESTOCK_THRESHOLD["P1"] - amount_of_p1), needed_days)
+    #         self.p2_supplier = find_supplier("P2", (RESTOCK_THRESHOLD["P2"] - amount_of_p2), needed_days)
+    #
+    #         self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
+    #         self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+    #         desired__p1_index_day = needed_days * suppliers[self.p1_supplier]['P1']['delivery_time']
+    #         desired__p2_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
+    #         desired_index_day = needed_days * max(suppliers[self.p1_supplier]['P1']['delivery_time'],
+    #                                               suppliers[self.p2_supplier]['P2']['delivery_time'])
+    #
+    #         # update_all_orders_arrival_day(desired_index_day)
+    #
+    #         self.nested_purchasing_list[
+    #             desired__p1_index_day - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
+    #             f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
+    #
+    #         self.nested_purchasing_list[
+    #             desired__p2_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
+    #             f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+    #
+    #         restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+    #                            request_restock(P1_AND_P2_RESTOCK_STR, '0', self.amount_of_p1_to_restock,
+    #                                            self.amount_of_p2_to_restock))
+    #
+    #         stats.update_All_RC(suppliers[self.p2_supplier]['P1']['price'])
+    #
+    #      elif amount_of_p1 < RESTOCK_THRESHOLD["P1"] and self.check_for_warehouse_space(amount_of_p1, amount_of_p2):
+    #         needed_days = (RESTOCK_THRESHOLD["P1"] - amount_of_p1) / P1_RESTOCK_LIMIT_BY_DAY
+    #         needed_days = add_one_if_float(needed_days)  # add one day of not int
+    #         self.amount_of_p1_to_restock = (RESTOCK_THRESHOLD["P1"] - amount_of_p1)
+    #         self.p1_supplier = find_supplier("P1", RESTOCK_THRESHOLD["P1"] - amount_of_p1, needed_days)
+    #         self.total_cost_of_p1 = self.amount_of_p1_to_restock * suppliers[self.p1_supplier]['P1']['price']
+    #         desired_index_day = needed_days * suppliers[self.p1_supplier]['P1']['delivery_time']
+    #         restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+    #                            request_restock(P1_RESTOCK_STR, '0', self.amount_of_p1_to_restock, 0))
+    #         self.nested_purchasing_list[
+    #             desired_index_day - suppliers[self.p1_supplier]['P1']['delivery_time']].append(
+    #             f"Buy from {self.p1_supplier} {self.amount_of_p1_to_restock} P1s")
+    #
+    #         stats.update_All_RC(suppliers[self.p1_supplier]['P1']['price'])
+    #
+    #         # need to implement for these cases too
+    #
+    #     # now for piece p2
+    #     elif amount_of_p2 < RESTOCK_THRESHOLD["P2"] and self.check_for_warehouse_space(amount_of_p1, amount_of_p2):
+    #         needed_days = (RESTOCK_THRESHOLD["P2"] - amount_of_p2) / P2_RESTOCK_LIMIT_BY_DAY
+    #         needed_days = add_one_if_float(needed_days)  # add one day of not int
+    #         self.amount_of_p2_to_restock = (RESTOCK_THRESHOLD["P2"] - amount_of_p2)
+    #         self.p2_supplier = find_supplier("P2", RESTOCK_THRESHOLD["P2"] - amount_of_p2, needed_days)
+    #         self.total_cost_of_p2 = self.amount_of_p2_to_restock * suppliers[self.p2_supplier]['P2']['price']
+    #         desired_index_day = needed_days * suppliers[self.p2_supplier]['P2']['delivery_time']
+    #         restock_shift_list(self.nested_result_list, desired_index_day, needed_days,
+    #                            request_restock(P2_RESTOCK_STR, '0', 0, self.amount_of_p2_to_restock))
+    #
+    #         # need to implement for these cases too
+    #
+    #         self.nested_purchasing_list[
+    #             desired_index_day - suppliers[self.p2_supplier]['P2']['delivery_time']].append(
+    #             f"Buy form {self.p2_supplier} {self.amount_of_p2_to_restock} P2s")
+    #
+    #         # print(suppliers[self.p2_supplier]['P2']['price'])
+    #         stats.update_All_RC(suppliers[self.p2_supplier]['P2']['price'])
+    #
 
     def lock_current_day(self):
         # copy the current day on a self list
         self.current_day = self.nested_result_list[0].copy()
-        for _ in range(0, self.count_execution):
-            del self.nested_result_list[0]
-            if len(self.nested_purchasing_list) != 0:
-                del self.nested_purchasing_list[0]
+        del self.nested_result_list[0]
+        self.check_warehouse_status()
+        if len(self.nested_purchasing_list) != 0:
+            del self.nested_purchasing_list[0]
+        # for _ in range(0, self.count_execution):
+        #     del self.nested_result_list[0]
+        #     if len(self.nested_purchasing_list) != 0:
+        #         del self.nested_purchasing_list[0]
 
     def show_schedule(self):
         day = 0
@@ -563,11 +823,20 @@ class Scheduler:
             print(f"day:{day} \n {each_list}")
             day += 1
 
+    def set_current_day_index(self, day_index):
+        self.current_day_index = day_index
+
     def log_schedule(self, day):
-        logging.info(f"--------------------- Day Index: {day} ------------------------")
+        local_day = day
+        logging.info(f"--------------------- Day Index: {local_day} ------------------------")
+        logging.info(f"         --------------------- Purchasing Plan ------------------------")
+        for each_list in self.nested_purchasing_list:
+            logging.info(f"day:{local_day} \n {each_list}")
+            local_day += 1
+        logging.info(f"         \n--------------------- Schedule Plan ------------------------")
         local_day = day
         for each_list in self.nested_result_list:
-            logging.info(f"day:{local_day - day} \n {each_list}")
+            logging.info(f"day:{local_day} \n {each_list}")
             local_day += 1
         logging.info("------------------------------------------------------------------------")
         logging.info("\n")

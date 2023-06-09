@@ -1,0 +1,77 @@
+INFO:root:--------------------- Day Index: 0 ------------------------
+INFO:root:         --------------------- Purchasing Plan ------------------------
+INFO:root:day:0 
+ ['Buy from B 16 P2s']
+INFO:root:day:1 
+ []
+INFO:root:day:2 
+ []
+INFO:root:day:3 
+ []
+INFO:root:day:4 
+ []
+INFO:root:         
+--------------------- Schedule Plan ------------------------
+INFO:root:day:0 
+ []
+INFO:root:day:1 
+ []
+INFO:root:day:2 
+ [{'workpiece': 'P2 restock', 'status': '0', 'p1_amount': 0, 'p2_amount': 16}]
+INFO:root:day:3 
+ [{'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}]
+INFO:root:day:4 
+ [{'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}]
+INFO:root:------------------------------------------------------------------------
+INFO:root:
+
+INFO:root:--------------------- Day Index: 1 ------------------------
+INFO:root:         --------------------- Purchasing Plan ------------------------
+INFO:root:day:1 
+ ['Buy from B 16 P2s']
+INFO:root:day:2 
+ []
+INFO:root:day:3 
+ []
+INFO:root:day:4 
+ []
+INFO:root:day:5 
+ []
+INFO:root:         
+--------------------- Schedule Plan ------------------------
+INFO:root:day:1 
+ []
+INFO:root:day:2 
+ []
+INFO:root:day:3 
+ [{'workpiece': 'P2 restock', 'status': '0', 'p1_amount': 0, 'p2_amount': 16}]
+INFO:root:day:4 
+ [{'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}]
+INFO:root:day:5 
+ [{'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}]
+INFO:root:------------------------------------------------------------------------
+INFO:root:
+
+INFO:root:--------------------- Day Index: 2 ------------------------
+INFO:root:         --------------------- Purchasing Plan ------------------------
+INFO:root:day:2 
+ []
+INFO:root:day:3 
+ []
+INFO:root:day:4 
+ []
+INFO:root:day:5 
+ []
+INFO:root:         
+--------------------- Schedule Plan ------------------------
+INFO:root:day:2 
+ []
+INFO:root:day:3 
+ [{'workpiece': 'P2 restock', 'status': '0', 'p1_amount': 0, 'p2_amount': 16}]
+INFO:root:day:4 
+ [{'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}, {'workpiece': 'P3', 'status': 'store2deliver', 'p1_amount': 0, 'p2_amount': 0}]
+INFO:root:day:5 
+ [{'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}, {'workpiece': 'P3', 'status': 'makeANDdeliver', 'p1_amount': 0, 'p2_amount': 0, 'order_id': ' 20'}]
+INFO:root:------------------------------------------------------------------------
+INFO:root:
+

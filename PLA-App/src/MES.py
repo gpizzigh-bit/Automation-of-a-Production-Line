@@ -25,7 +25,6 @@ stats = Statistics()
 stock = Stock()
 
 
-
 class ThreadedServer(threading.Thread):
     def __init__(self):
         # create the server object for communication
@@ -848,9 +847,9 @@ def make_on_m4(towrite, todo, c, p, time_needed, requests):
 def switch_case(x, machine_number, todo, c, p1_quantity, p2_quantity, requests):
     import time
     c = c
-    p1_quantity=int(p1_quantity)
-    p2_quantity=int(p2_quantity)
-    if todo!="0":
+    p1_quantity = int(p1_quantity)
+    p2_quantity = int(p2_quantity)
+    if todo != "0":
         p = int(x[1:])
     if x == 'P1 and P2 restock':
         p1_time = p1_quantity * P1_RESTOCK_TIME
@@ -1173,6 +1172,7 @@ def show_terminal_end(requests, time):
 
     print('-----------------------------------------------------------------------')
 
+
 def show_terminal_shipping(p, n):
     print('-----------------------------------------------------------------------')
     title = pyfiglet.figlet_format('MES TERMINAL')
@@ -1187,6 +1187,7 @@ def show_terminal_shipping(p, n):
     print(f'{string}\n')
 
     print('-----------------------------------------------------------------------')
+
 
 def is_new(old_list, new_list):
     # if not old_list and not new_list:
@@ -1280,16 +1281,56 @@ def conclude_order(local_order_id: str, current_day):
     orders_obj.delete_Order(number, client_id)
 
 
+def start_factory_plant_logic(requests):
+    # Connect to server
+    url = "opc.tcp://localhost:4840"
+    client = Client(url)
+    client.connect()
+    c = [0, 0, 0, 0, 0, 0, 0]  # peças em armazem
+    maquina = [0, 0]
+    size = len(requests)
+    id = 0
+    first_iteration = 1
+    if requests:
+        if requests[0]['status'] != '0':
+            show_terminal(requests, id, 0, 1)
+        a = time.time()
+
+        for id in range(size):
+            show_terminal(requests, id, 0, 0)
+            string = requests[id]['workpiece']
+            todo = requests[id]['status']
+            p1_quantity = requests[id]['p1_amount']
+            p2_quantity = requests[id]['p2_amount']
+
+            if id == (size - 1):
+                next_string = '0'
+            else:
+                next_string = requests[id + 1]['workpiece']
+
+            if todo != '0':
+                aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1],
+                                       client)
+                maquina = aux
+                machines_state[maquina[0] - 1] = get_tool(string)
+                first_iteration = 0
+                print(f'about to make a piece on machine {maquina[0]}')
+            else:
+                maquina[0] = 0
+            switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
+            b = time.time()
+            b = b - a
+            show_terminal_end(requests, b)
+            print("new day")
+    else:
+        print('Factory in stand-by')
+
+
 if __name__ == '__main__':
 
     comm_to_erp = ThreadedServer()
     comm_to_erp.start()
-    #Connect to server
-    url = "opc.tcp://localhost:4840"
-    client = Client(url)
-    client.connect()
-    c=[0,0,0,0,0,0,0] #peças em armazem
-    maquina=[0,0]
+
 
     stock.update_Stock_P1(20)
     stock.update_Stock_P2(0)
@@ -1314,49 +1355,12 @@ if __name__ == '__main__':
                     conclude_order(order_id, day_cnt)
                 if search_for_restock_order(message):
                     # update the arrival date for all orders
+                    stock.update_Stock_P2(10)
                     update_arrival_date_for_all_orders(day_cnt)
                     # TODO in the future make this dynamic...
-                requests = message
-                size = len(requests)
-                id = 0
-                first_iteration = 1
-                if requests:
-                    if requests[0]['status']!='0':
-                        show_terminal(requests, id, 0, 1)
-                    a = time.time()
-
-                    for id in range(size):
-                        show_terminal(requests, id, 0, 0)
-                        string = requests[id]['workpiece']
-                        todo = requests[id]['status']
-                        p1_quantity = requests[id]['p1_amount']
-                        p2_quantity = requests[id]['p2_amount']
-
-                        if id == (size - 1):
-                            next_string = '0'
-                        else:
-                            next_string = requests[id + 1]['workpiece']
-
-                        if todo != '0':
-                            aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1],
-                                                   client)
-                            maquina = aux
-                            machines_state[maquina[0] - 1] = get_tool(string)
-                            first_iteration = 0
-                            print(f'about to make a piece on machine {maquina[0]}')
-                        else:
-                            maquina[0] = 0
-                        switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
-                        b = time.time()
-                        b = b - a
-                        show_terminal_end(requests, b)
-                        print("new day")
-                else:
-                    print('Factory in stand-by')
-    else:
+                #start_factory_plant_logic(message)
+        else:
             message_received = False
-
-
 
     """requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
@@ -1369,5 +1373,3 @@ if __name__ == '__main__':
 
     day_cnt=0
     """
-
-

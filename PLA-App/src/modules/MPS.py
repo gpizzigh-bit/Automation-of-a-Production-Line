@@ -535,7 +535,7 @@ class Scheduler:
             desired__p1_index_day = find_first_empty_day(self.nested_result_list)
             desired__p2_index_day = find_first_empty_day(self.nested_result_list)
 
-        if amount_of_p1_to_buy <= suppliers[self.p1_supplier]['P1']['min_order_quantity']:
+        if amount_of_p1_to_buy <= suppliers['C']['P1']['min_order_quantity']:
             minimum_amount = suppliers[self.p1_supplier]['P1']['min_order_quantity']
             self.total_cost_of_p1 = amount_of_p1_to_buy * minimum_amount * suppliers[self.p1_supplier]['P1']['price']
             restock_shift_list(self.nested_result_list, desired__p1_index_day + max_of_supplier, needed_days,
@@ -553,7 +553,7 @@ class Scheduler:
 
             stats.update_All_RC(suppliers[self.p1_supplier]['P1']['price'])
 
-        elif amount_of_p2_to_buy <= suppliers[self.p2_supplier]['P2']['min_order_quantity']:
+        elif amount_of_p2_to_buy <= suppliers['C']['P2']['min_order_quantity']:
             minimum_amount = suppliers[self.p2_supplier]['P2']['min_order_quantity']
             self.total_cost_of_p2 = amount_of_p2_to_buy * minimum_amount * suppliers[self.p2_supplier]['P2']['price']
 
@@ -597,17 +597,16 @@ class Scheduler:
         needed_days = amount_of_p1_to_buy / P1_RESTOCK_LIMIT_BY_DAY
         needed_days = add_one_if_float(needed_days)  # add one day of not int
         if free_days >= 1:
-            print(f"amount of {amount_of_p1_to_buy} in {free_days} days")
             self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, free_days)
         else:
             self.p1_supplier = find_supplier("P1", amount_of_p1_to_buy, 1)
         desired_index_day = self.current_day_index
-        if amount_of_p1_to_buy <= suppliers[self.p1_supplier]['P1']['min_order_quantity']:
+        if amount_of_p1_to_buy <= suppliers['C']['P1']['min_order_quantity']:
             if free_days >= 1:
                 desired__p2_index_day = find_first_empty_day(self.nested_result_list)
-            minimum_amount = suppliers[self.p1_supplier]['P1']['min_order_quantity']
-            self.total_cost_of_p1 = amount_of_p1_to_buy * minimum_amount * suppliers[self.p1_supplier]['P1']['price']
-            restock_shift_list(self.nested_result_list, desired_index_day + suppliers[self.p1_supplier]['P1']['delivery_time'], needed_days,
+            minimum_amount = suppliers['C']['P1']['min_order_quantity']
+            self.total_cost_of_p1 = amount_of_p1_to_buy * minimum_amount * suppliers['C']['P1']['price']
+            restock_shift_list(self.nested_result_list, desired_index_day + suppliers['C']['P1']['delivery_time'], needed_days,
                                request_restock(P1_RESTOCK_STR, '0', amount_of_p1_to_buy + minimum_amount, 0))
             self.nested_purchasing_list[
                 desired_index_day].append(
@@ -635,15 +634,15 @@ class Scheduler:
             self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, free_days)
         else:
             self.p2_supplier = find_supplier("P2", amount_of_p2_to_buy, 1)
-        desired__p2_index_day = self.current_day_index  # try always to be tomorrow
-        if amount_of_p2_to_buy <= suppliers[self.p2_supplier]['P2']['min_order_quantity']:
+        desired__p2_index_day = self.current_day_index  # try always to be today
+        if amount_of_p2_to_buy <= suppliers['C']['P2']['min_order_quantity']:
             if free_days >= 1:
                 desired__p2_index_day = find_first_empty_day(self.nested_result_list)
-            minimum_amount = suppliers[self.p2_supplier]['P2']['min_order_quantity']
+            minimum_amount = suppliers['C']['P2']['min_order_quantity']
             self.total_cost_of_p2 = amount_of_p2_to_buy * minimum_amount * suppliers[self.p2_supplier]['P1']['price']
             # desired_index_day = needed_days + suppliers[self.p2_supplier]['P2']['delivery_time']
             restock_shift_list(self.nested_result_list,
-                               desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time'],
+                               desired__p2_index_day + suppliers['C']['P2']['delivery_time'],
                                needed_days,
                                request_restock(P2_RESTOCK_STR, '0', 0, amount_of_p2_to_buy + minimum_amount))
 
@@ -657,11 +656,11 @@ class Scheduler:
             self.total_cost_of_p2 = amount_of_p2_to_buy * suppliers[self.p2_supplier]['P2']['price']
             restock_shift_list(self.nested_result_list,
                                desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time'], needed_days,
-                               request_restock(P2_RESTOCK_STR, '0', 0, amount_of_p2_to_buy - self.current_amount_of_p2))
+                               request_restock(P2_RESTOCK_STR, '0', 0, abs(amount_of_p2_to_buy - self.current_amount_of_p2)))
 
             self.nested_purchasing_list[
                 desired__p2_index_day].append(
-                f"Buy from {self.p2_supplier} {amount_of_p2_to_buy} P2s")
+                f"Buy from {self.p2_supplier} {abs(amount_of_p2_to_buy - self.current_amount_of_p2)} P2s")
 
         stats.update_All_RC(suppliers[self.p2_supplier]['P2']['price'])
         self.restock_predicted_day = desired__p2_index_day + suppliers[self.p2_supplier]['P2']['delivery_time']

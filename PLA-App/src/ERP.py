@@ -27,7 +27,7 @@ TCP_PORT = 12345
 FEEDBACK_MSG = "Message Received!"
 HANDSHAKE_FROM_ERP = "HANDSHAKE FROM ERP"
 
-day_time = 20
+day_time = 60
 
 mps = MPS.Scheduler()
 stats = database_orders_class.Statistics()
@@ -162,24 +162,31 @@ def simulate_day_cycle():
     mps.first_run()
     mps.log_schedule(0)
     current_time = start_time = 0
-    send_current_day = True
+    message = mps.get_plans_list()[0]
+    comm_to_mes.set_msg(message)
+    print(f"Sending a new message from the ERP {message} on day {day_index}")
     show_interface(day_index)
+    if not message:
+        day_time = 5
     while current_time - start_time <= day_time:
         time.sleep(1)  # current time is equal to 1s
         current_time += 1
         if current_time - start_time >= day_time:
+            pass_to_next_day()
             os.system('cls')
             day_index += 1
             mps.set_current_day_index(day_index)
             mps.log_schedule(day_index)
-            pass_to_next_day()
-            show_interface(day_index)
             start_time = current_time = 0
-            send_current_day = True
-        elif send_current_day is True:
-            message = mps.current_day
+            #message = mps.current_day
+            message = mps.get_plans_list()[0]
+            if not message:
+                day_time = 5
+            else:
+                day_time = 60
             comm_to_mes.set_msg(message)
-            send_current_day = False
+            print(f"Sending a new message from the ERP {message} on day {day_index}")
+            show_interface(day_index)
             if mps.get_restock_predicted_day() == day_index:
                 mps.unlock_for_restock()
         elif comm_to_mes.get_feedback_msg() == FEEDBACK_MSG:

@@ -3,7 +3,6 @@ import time
 
 import pyfiglet
 from opcua import ua, Client
-from termcolor import colored
 from modules.database_orders_class import Database, Stock, Orders, Concluded, Statistics
 from modules import tcp_comm
 import numpy as np
@@ -1046,7 +1045,7 @@ def show_terminal(requests, id, time, init):
     string4 = '               Fourth Order:'
     string5 = '         Status:'
     string6 = '        Status:'
-    if requests[0]['status'] == 0:
+    if requests[0]['status'] == '0':
         string = '                             RESTOCK DAY'
         stringg = '          pieces P1 and P2 are being stored in the warehouse'
         print(string)
@@ -1139,7 +1138,7 @@ def show_terminal_end(requests, time):
     string4 = '               Fourth Order:'
     string5 = '         Status:'
     string6 = '        Status:'
-    if requests[0]['status'] == 0:
+    if requests[0]['status'] == '0':
         string = '                           RESTOCK FINISHED'
         stringg = '            pieces P1 and P2 are now stored in the warehouse'
         print(string)
@@ -1318,11 +1317,11 @@ if __name__ == '__main__':
                     update_arrival_date_for_all_orders(day_cnt)
                     # TODO in the future make this dynamic...
                 requests = message
+                size = len(requests)
+                id = 0
+                first_iteration = 1
                 if requests:
-                    size = len(requests)
-                    id = 0
-                    first_iteration = 1
-                    if requests is not None:
+                    if requests[0]['status']!='0':
                         show_terminal(requests, id, 0, 1)
                     a = time.time()
 
@@ -1347,70 +1346,28 @@ if __name__ == '__main__':
                             print(f'about to make a piece on machine {maquina[0]}')
                         else:
                             maquina[0] = 0
-                            print('about to restock')
                         switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
-                        print('piece done')
                         b = time.time()
                         b = b - a
                         show_terminal_end(requests, b)
                         print("new day")
                 else:
                     print('Factory in stand-by')
-        else:
+    else:
             message_received = False
 
-"""
 
-    requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
+
+    """requests = [{'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'store2deliver', 'p1_amount': '0', 'p2_amount': '0'},
                 {'workpiece': 'P6', 'status': 'makeANDdeliver', 'p1_amount': '0', 'p2_amount': '0'}]
 
 
-    #requests = [{'workpiece': 'P1 and P2 restock', 'status': '0', 'p1_amount': '3', 'p2_amount': '5'}]
+    requests = [{'workpiece': 'P1 and P2 restock', 'status': '0', 'p1_amount': '3', 'p2_amount': '5'}]
     #requests = []
 
     day_cnt=0
-
-    size = len(requests)
-    id = 0
-    first_iteration = 1
-    if requests:
-        show_terminal(requests, id, 0, 1)
-        a = time.time()
-
-        for id in range(size):
-            show_terminal(requests, id, 0, 0)
-            string = requests[id]['workpiece']
-            todo = requests[id]['status']
-            p1_quantity = requests[id]['p1_amount']
-            p2_quantity = requests[id]['p2_amount']
-
-            if id == (size - 1):
-                next_string = '0'
-            else:
-                next_string = requests[id + 1]['workpiece']
-
-            if todo != '0':
-                aux = machine_decision(string, next_string, machines_state, first_iteration, id, maquina[1],
-                                       client)
-                maquina = aux
-                machines_state[maquina[0] - 1] = get_tool(string)
-                first_iteration = 0
-                print(f'about to make a piece on machine {maquina[0]}')
-            else:
-                maquina[0] = 0
-                print('about to restock')
-            switch_case(string, maquina[0], todo, c, p1_quantity, p2_quantity, requests)
-            print('piece done')
-            b = time.time()
-            b = b - a
-            show_terminal_end(requests, b)
-            print("new day")
-    else:
-        print('Factory in stand-by')
-        
-"""
-
+    """
 
 

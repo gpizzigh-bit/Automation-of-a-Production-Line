@@ -1355,10 +1355,9 @@ if __name__ == '__main__':
                     conclude_order(order_id, day_cnt)
                 if search_for_restock_order(message):
                     # update the arrival date for all orders
-                    stock.update_Stock_P2(10)
                     update_arrival_date_for_all_orders(day_cnt)
                     # TODO in the future make this dynamic...
-                #start_factory_plant_logic(message)
+                start_factory_plant_logic(message)
         else:
             message_received = False
 
